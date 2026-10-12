@@ -1,0 +1,21 @@
+generated: '2026-10-12'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://en.mailsenpai.com/plans/
+sources:
+- https://en.mailsenpai.com/plans/
+name: SMTP Senpai (MailSenpai) pricing
+audience: business-product
+pricing_basis: per-seat
+plans:
+- name: Basic
+  price_text: € 13.49 per month (annual plan)
+  price: 13.49
+- name: Plus
+  price_text: € 89.49 per month (annual plan)
+  price: 89.49
+- name: Smart
+  price_text: Custom
+- name: Free
+  price_text: Free
+docs: https://en.mailsenpai.com/plans/

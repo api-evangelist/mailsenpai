@@ -1,0 +1,25 @@
+generated: '2026-10-12'
+method: generated
+generator: extract-docs-artifacts.py skills (local)
+source: openapi/mailsenpai-openapi.json
+skills:
+- file: skills/mailsenpai-website-forms-submit-and-retrieve.md
+  name: mailsenpai-website-forms-submit-and-retrieve
+  api: openapi/mailsenpai-openapi.json
+  operations:
+  - moduloInvia
+  - moduloInfo
+- file: skills/mailsenpai-suppression-add-remove.md
+  name: mailsenpai-suppression-add-remove
+  api: openapi/mailsenpai-openapi.json
+  operations:
+  - sopprimi
+  - riammetti
+  - soppressi
+- file: skills/mailsenpai-webhook-setup-and-test.md
+  name: mailsenpai-webhook-setup-and-test
+  api: openapi/mailsenpai-openapi.json
+  operations:
+  - webhookImposta
+  - webhookProva
+  - webhookLeggi

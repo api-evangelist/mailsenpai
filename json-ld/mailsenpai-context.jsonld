@@ -1,0 +1,332 @@
+{
+  "@context": {
+    "@vocab": "https://mailsenpai.com/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "mailsenpai": "https://mailsenpai.com/schema#",
+    "Errore": "mailsenpai:Errore",
+    "ok": {
+      "@id": "mailsenpai:ok",
+      "@type": "xsd:boolean"
+    },
+    "errore": {
+      "@id": "mailsenpai:errore",
+      "@type": "xsd:string"
+    },
+    "Stato": "mailsenpai:Stato",
+    "stato": {
+      "@id": "mailsenpai:stato",
+      "@type": "xsd:string"
+    },
+    "smtp": {
+      "@id": "mailsenpai:smtp"
+    },
+    "volume": {
+      "@id": "mailsenpai:volume"
+    },
+    "tracciamento": {
+      "@id": "mailsenpai:tracciamento",
+      "@type": "xsd:boolean"
+    },
+    "soppressi": {
+      "@id": "mailsenpai:soppressi",
+      "@type": "xsd:integer"
+    },
+    "InvioRichiesta": "mailsenpai:InvioRichiesta",
+    "a": {
+      "@id": "mailsenpai:a"
+    },
+    "to": {
+      "@id": "mailsenpai:to"
+    },
+    "da": {
+      "@id": "mailsenpai:da",
+      "@type": "xsd:string"
+    },
+    "from": {
+      "@id": "mailsenpai:from",
+      "@type": "xsd:string"
+    },
+    "nome_mittente": {
+      "@id": "mailsenpai:nome_mittente",
+      "@type": "xsd:string"
+    },
+    "from_name": {
+      "@id": "mailsenpai:from_name",
+      "@type": "xsd:string"
+    },
+    "oggetto": {
+      "@id": "mailsenpai:oggetto",
+      "@type": "xsd:string"
+    },
+    "subject": {
+      "@id": "mailsenpai:subject",
+      "@type": "xsd:string"
+    },
+    "html": {
+      "@id": "mailsenpai:html",
+      "@type": "xsd:string"
+    },
+    "testo": {
+      "@id": "mailsenpai:testo",
+      "@type": "xsd:string"
+    },
+    "text": {
+      "@id": "mailsenpai:text",
+      "@type": "xsd:string"
+    },
+    "rispondi_a": {
+      "@id": "mailsenpai:rispondi_a",
+      "@type": "xsd:string"
+    },
+    "reply_to": {
+      "@id": "mailsenpai:reply_to",
+      "@type": "xsd:string"
+    },
+    "intestazioni": {
+      "@id": "mailsenpai:intestazioni"
+    },
+    "headers": {
+      "@id": "mailsenpai:headers"
+    },
+    "allegati": {
+      "@id": "mailsenpai:allegati",
+      "@container": "@list"
+    },
+    "attachments": {
+      "@id": "mailsenpai:attachments",
+      "@container": "@list"
+    },
+    "InvioOk": "mailsenpai:InvioOk",
+    "inviato": {
+      "@id": "mailsenpai:inviato",
+      "@type": "xsd:boolean"
+    },
+    "id_messaggio": {
+      "@id": "mailsenpai:id_messaggio",
+      "@type": "xsd:string"
+    },
+    "residuo": {
+      "@id": "mailsenpai:residuo",
+      "@type": "xsd:integer"
+    },
+    "oltre_il_piano": {
+      "@id": "mailsenpai:oltre_il_piano",
+      "@type": "xsd:boolean"
+    },
+    "InvioSoppresso": "mailsenpai:InvioSoppresso",
+    "motivo": {
+      "@id": "mailsenpai:motivo",
+      "@type": "xsd:string"
+    },
+    "Conteggi": "mailsenpai:Conteggi",
+    "sent": {
+      "@id": "mailsenpai:sent",
+      "@type": "xsd:integer"
+    },
+    "delivered": {
+      "@id": "mailsenpai:delivered",
+      "@type": "xsd:integer"
+    },
+    "bounce": {
+      "@id": "mailsenpai:bounce",
+      "@type": "xsd:integer"
+    },
+    "defer": {
+      "@id": "mailsenpai:defer",
+      "@type": "xsd:integer"
+    },
+    "complaint": {
+      "@id": "mailsenpai:complaint",
+      "@type": "xsd:integer"
+    },
+    "open": {
+      "@id": "mailsenpai:open",
+      "@type": "xsd:integer"
+    },
+    "click": {
+      "@id": "mailsenpai:click",
+      "@type": "xsd:integer"
+    },
+    "tasso_consegna": {
+      "@id": "mailsenpai:tasso_consegna",
+      "@type": "xsd:decimal"
+    },
+    "tasso_rimbalzo": {
+      "@id": "mailsenpai:tasso_rimbalzo",
+      "@type": "xsd:decimal"
+    },
+    "tasso_segnalazioni": {
+      "@id": "mailsenpai:tasso_segnalazioni",
+      "@type": "xsd:decimal"
+    },
+    "Evento": "mailsenpai:Evento",
+    "event_id": {
+      "@id": "mailsenpai:event_id",
+      "@type": "xsd:string"
+    },
+    "relay_id": {
+      "@id": "mailsenpai:relay_id",
+      "@type": "xsd:string"
+    },
+    "type": {
+      "@id": "mailsenpai:type",
+      "@type": "@id"
+    },
+    "email": {
+      "@id": "mailsenpai:email",
+      "@type": "xsd:string"
+    },
+    "domain": {
+      "@id": "mailsenpai:domain",
+      "@type": "xsd:string"
+    },
+    "from_domain": {
+      "@id": "mailsenpai:from_domain",
+      "@type": "xsd:string"
+    },
+    "code": {
+      "@id": "mailsenpai:code",
+      "@type": "xsd:string"
+    },
+    "reason": {
+      "@id": "mailsenpai:reason",
+      "@type": "xsd:string"
+    },
+    "message_id": {
+      "@id": "mailsenpai:message_id",
+      "@type": "xsd:string"
+    },
+    "url": {
+      "@id": "mailsenpai:url",
+      "@type": "xsd:string"
+    },
+    "happened_at": {
+      "@id": "mailsenpai:happened_at",
+      "@type": "xsd:string"
+    },
+    "TipoEvento": "mailsenpai:TipoEvento",
+    "Soppresso": "mailsenpai:Soppresso",
+    "supp_id": {
+      "@id": "mailsenpai:supp_id",
+      "@type": "xsd:string"
+    },
+    "note": {
+      "@id": "mailsenpai:note",
+      "@type": "xsd:string"
+    },
+    "created_at": {
+      "@id": "mailsenpai:created_at",
+      "@type": "xsd:string"
+    },
+    "Esito": "mailsenpai:Esito",
+    "ModuloInfo": "mailsenpai:ModuloInfo",
+    "modulo": {
+      "@id": "mailsenpai:modulo",
+      "@type": "xsd:string"
+    },
+    "come": {
+      "@id": "mailsenpai:come",
+      "@type": "xsd:string"
+    },
+    "campi": {
+      "@id": "mailsenpai:campi",
+      "@container": "@list"
+    },
+    "ModuloCampi": "mailsenpai:ModuloCampi",
+    "_subject": {
+      "@id": "mailsenpai:_subject",
+      "@type": "xsd:string"
+    },
+    "_replyto": {
+      "@id": "mailsenpai:_replyto",
+      "@type": "xsd:string"
+    },
+    "_next": {
+      "@id": "mailsenpai:_next",
+      "@type": "@id"
+    },
+    "_cc": {
+      "@id": "mailsenpai:_cc",
+      "@type": "xsd:string"
+    },
+    "_gotcha": {
+      "@id": "mailsenpai:_gotcha",
+      "@type": "xsd:string"
+    },
+    "_format": {
+      "@id": "mailsenpai:_format",
+      "@type": "xsd:string"
+    },
+    "Allegato": "mailsenpai:Allegato",
+    "nome": {
+      "@id": "mailsenpai:nome",
+      "@type": "xsd:string"
+    },
+    "contenuto": {
+      "@id": "mailsenpai:contenuto",
+      "@type": "xsd:string"
+    },
+    "tipo": {
+      "@id": "mailsenpai:tipo",
+      "@type": "xsd:string"
+    },
+    "InvioMulti": "mailsenpai:InvioMulti",
+    "inviati": {
+      "@id": "mailsenpai:inviati",
+      "@type": "xsd:integer"
+    },
+    "non_inviati": {
+      "@id": "mailsenpai:non_inviati",
+      "@type": "xsd:integer"
+    },
+    "risultati": {
+      "@id": "mailsenpai:risultati",
+      "@container": "@list"
+    },
+    "Webhook": "mailsenpai:Webhook",
+    "eventi": {
+      "@id": "mailsenpai:eventi",
+      "@container": "@list"
+    },
+    "attivo": {
+      "@id": "mailsenpai:attivo",
+      "@type": "xsd:boolean"
+    },
+    "segreto": {
+      "@id": "mailsenpai:segreto",
+      "@type": "xsd:string"
+    },
+    "tipi_possibili": {
+      "@id": "mailsenpai:tipi_possibili",
+      "@container": "@list"
+    },
+    "ultime_24_ore": {
+      "@id": "mailsenpai:ultime_24_ore"
+    },
+    "EventoWebhook": "mailsenpai:EventoWebhook",
+    "id": {
+      "@id": "mailsenpai:id",
+      "@type": "xsd:string"
+    },
+    "data": {
+      "@id": "mailsenpai:data"
+    },
+    "account": {
+      "@id": "mailsenpai:account",
+      "@type": "xsd:string"
+    },
+    "test": {
+      "@id": "mailsenpai:test",
+      "@type": "xsd:boolean"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "SMTP Senpai (MailSenpai) API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects SMTP Senpai (MailSenpai)'s own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-12) from openapi/mailsenpai-openapi.json.",
+  "dcterms:created": "2026-10-12",
+  "dcterms:source": [
+    "openapi/mailsenpai-openapi.json"
+  ]
+}

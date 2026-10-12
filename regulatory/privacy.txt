@@ -1,0 +1,3 @@
+[status 200] [text/html; charset=UTF-8] [plain] [title: Privacy Policy | MailSenpai]
+Privacy Policy | MailSenpai 
+ Close without accepting We use technical cookies and, with your consent, statistical and profiling cookies, including third-party ones. Read more This website uses essential technical cookies for its proper functioning, and so on...

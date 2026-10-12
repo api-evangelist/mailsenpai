@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mailsenpai/main/json-schema/mailsenpai-evento-schema.json",
+  "title": "Evento",
+  "description": "Log row. Treat ids as text; dates are UTC in `YYYY-MM-DD HH:MM:SS` format.",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mailsenpai-openapi.json#/components/schemas/Evento",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^\\d+$"
+    },
+    "relay_id": {
+      "type": "string",
+      "pattern": "^\\d+$"
+    },
+    "type": {
+      "$ref": "#/$defs/TipoEvento"
+    },
+    "email": {
+      "type": "string",
+      "description": "Recipient."
+    },
+    "domain": {
+      "type": "string",
+      "description": "Recipient domain."
+    },
+    "from_domain": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string",
+      "description": "Code returned by the recipient server, if any."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Readable reason (bounces, deferrals, drops)."
+    },
+    "message_id": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "description": "Clicked link (click events only)."
+    },
+    "happened_at": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "TipoEvento": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "delivered",
+        "bounce",
+        "defer",
+        "complaint",
+        "open",
+        "click",
+        "dropped"
+      ],
+      "description": "`sent` accepted via API or form · `delivered` delivered · `bounce` permanent rejection · `defer` deferred, will retry · `complaint` spam report · `open`/`click` with tracking · `dropped` not sent because the recipient is on the suppression list."
+    }
+  }
+}

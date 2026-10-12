@@ -1,0 +1,86 @@
+generated: '2026-10-12'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/mailsenpai-openapi.json
+format: custom
+envelope:
+  media_type: application/json
+  schema: Errore
+coverage:
+  operations: 13
+  statuses_declared: 10
+problems:
+- status: 400
+  title: Bad Request
+  description: Missing or invalid data.
+  operations: 3
+  media_types:
+  - application/json
+  - text/html
+  schema: Errore
+- status: 401
+  title: Unauthorized
+  description: Missing or invalid key.
+  operations: 10
+  media_types:
+  - application/json
+  schema: Errore
+- status: 403
+  title: Forbidden
+  description: Account suspended (plan expired or unpaid, volume used up without continuity, spending cap reached…).
+    The message states the reason.
+  operations: 8
+  media_types:
+  - application/json
+  schema: Errore
+- status: 404
+  title: Not Found
+  description: Form not found.
+  operations: 3
+  media_types:
+  - application/json
+  schema: Errore
+- status: 405
+  title: Method Not Allowed
+  description: 'HTTP method not allowed: the Allow header gives the right one.'
+  operations: 10
+  media_types:
+  - application/json
+  schema: Errore
+- status: 409
+  title: Conflict
+  description: A request with the same Idempotency-Key is still in progress.
+  operations: 3
+  media_types:
+  - application/json
+  schema: Errore
+- status: 413
+  title: Content Too Large
+  description: Attachments over 10 MB.
+  operations: 1
+  media_types:
+  - application/json
+  schema: Errore
+- status: 422
+  title: Unprocessable Content
+  description: Idempotency-Key already used with different data.
+  operations: 3
+  media_types:
+  - application/json
+  schema: Errore
+- status: 429
+  title: Too Many Requests
+  description: Monthly volume used up and sending continuity off (or spending cap reached).
+  operations: 2
+  media_types:
+  - application/json
+  schema: ErroreVolume
+- status: 502
+  title: Bad Gateway
+  description: 'The sending server did not accept the message or could not be reached: the text reports the reply
+    received.'
+  operations: 3
+  media_types:
+  - application/json
+  schema: Errore

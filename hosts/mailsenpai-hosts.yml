@@ -1,0 +1,122 @@
+generated: '2026-10-12'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 9
+  own: 4
+  other_domain: 3
+  platform: 2
+  roles:
+  - api
+  - identity
+  - other
+  - website
+hosts:
+- host: api.mailsenpai.com
+  found_by:
+  - contract-discovery
+  types: []
+  serves: []
+  registrable_domain: mailsenpai.com
+  role: api
+  relation: own
+- host: app.mailsenpai.com
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - site-links
+  - docs-index
+  - contract-discovery
+  - well-known
+  types:
+  - SignUp
+  serves:
+  - api
+  - docs
+  registrable_domain: mailsenpai.com
+  role: identity
+  relation: own
+- host: en.mailsenpai.com
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - docs-index
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - Website
+  - Documentation
+  - APIReference
+  - GettingStarted
+  - Support
+  - Blog
+  - Pricing
+  - TermsOfService
+  - PrivacyPolicy
+  serves:
+  - docs
+  - cdn
+  vendor: cloudflare
+  registrable_domain: mailsenpai.com
+  role: website
+  relation: own
+- host: gitlab.com
+  found_by:
+  - docs-index
+  types: []
+  serves:
+  - docs
+  registrable_domain: gitlab.com
+  role: other
+  relation: other-domain
+- host: packagist.org
+  found_by:
+  - docs-index
+  types: []
+  serves:
+  - docs
+  registrable_domain: packagist.org
+  role: other
+  relation: other-domain
+- host: pypi.org
+  found_by:
+  - docs-index
+  types: []
+  serves:
+  - docs
+  registrable_domain: pypi.org
+  role: other
+  relation: platform
+- host: rubygems.org
+  found_by:
+  - docs-index
+  types: []
+  serves:
+  - docs
+  registrable_domain: rubygems.org
+  role: other
+  relation: other-domain
+- host: www.mailsenpai.com
+  found_by:
+  - docs-index
+  - spec-found
+  types: []
+  serves:
+  - docs
+  - spec
+  registrable_domain: mailsenpai.com
+  role: other
+  relation: own
+- host: www.npmjs.com
+  found_by:
+  - docs-index
+  types: []
+  serves:
+  - docs
+  registrable_domain: npmjs.com
+  role: other
+  relation: platform

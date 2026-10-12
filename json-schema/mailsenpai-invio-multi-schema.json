@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mailsenpai/main/json-schema/mailsenpai-invio-multi-schema.json",
+  "title": "InvioMulti",
+  "description": "Response when `a` is a list.",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mailsenpai-openapi.json#/components/schemas/InvioMulti",
+  "type": "object",
+  "required": [
+    "ok",
+    "inviati",
+    "risultati"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "const": true
+    },
+    "inviati": {
+      "type": "integer"
+    },
+    "non_inviati": {
+      "type": "integer"
+    },
+    "risultati": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string"
+          },
+          "inviato": {
+            "type": "boolean"
+          },
+          "id_messaggio": {
+            "type": "string"
+          },
+          "motivo": {
+            "type": "string",
+            "description": "Why it was not sent (suppression)."
+          },
+          "errore": {
+            "type": "string",
+            "description": "Sending server error or volume used up for that recipient."
+          }
+        }
+      }
+    },
+    "residuo": {
+      "type": "integer"
+    },
+    "oltre_il_piano": {
+      "type": "boolean"
+    }
+  }
+}

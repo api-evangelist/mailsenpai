@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mailsenpai/main/json-schema/mailsenpai-invio-richiesta-schema.json",
+  "title": "InvioRichiesta",
+  "description": "One or more recipients (up to 50): each one gets their own copy. Italian names take precedence over the English aliases if you send both.",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mailsenpai-openapi.json#/components/schemas/InvioRichiesta",
+  "type": "object",
+  "properties": {
+    "a": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "email"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email"
+          },
+          "minItems": 1,
+          "maxItems": 50
+        }
+      ],
+      "description": "Recipient, or a list of up to 50 recipients."
+    },
+    "to": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "email"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email"
+          },
+          "minItems": 1,
+          "maxItems": 50
+        }
+      ],
+      "description": "Alias of `a`."
+    },
+    "da": {
+      "type": "string",
+      "format": "email",
+      "description": "Sender: must be on a verified domain of your account (subdomains are accepted)."
+    },
+    "from": {
+      "type": "string",
+      "format": "email",
+      "description": "Alias of `da`."
+    },
+    "nome_mittente": {
+      "type": "string",
+      "description": "Sender display name."
+    },
+    "from_name": {
+      "type": "string",
+      "description": "Alias of `nome_mittente`."
+    },
+    "oggetto": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "string",
+      "description": "Alias of `oggetto`."
+    },
+    "html": {
+      "type": "string",
+      "description": "HTML body. If the text part is missing, it is derived from the HTML."
+    },
+    "testo": {
+      "type": "string",
+      "description": "Plain-text body."
+    },
+    "text": {
+      "type": "string",
+      "description": "Alias of `testo`."
+    },
+    "rispondi_a": {
+      "type": "string",
+      "format": "email",
+      "description": "Reply-To address. Ignored if it is not a valid address."
+    },
+    "reply_to": {
+      "type": "string",
+      "format": "email",
+      "description": "Alias of `rispondi_a`."
+    },
+    "intestazioni": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Custom headers. Only `X-…` names pass (letters, digits and hyphens, max 40 characters after `X-`); others are dropped silently."
+    },
+    "headers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Alias of `intestazioni`."
+    },
+    "allegati": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/Allegato"
+      },
+      "description": "Up to 10 files and 10 MB in total (after decoding)."
+    },
+    "attachments": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/Allegato"
+      },
+      "description": "Alias of `allegati`."
+    }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": [
+            "a"
+          ]
+        },
+        {
+          "required": [
+            "to"
+          ]
+        }
+      ]
+    },
+    {
+      "anyOf": [
+        {
+          "required": [
+            "da"
+          ]
+        },
+        {
+          "required": [
+            "from"
+          ]
+        }
+      ]
+    },
+    {
+      "anyOf": [
+        {
+          "required": [
+            "oggetto"
+          ]
+        },
+        {
+          "required": [
+            "subject"
+          ]
+        }
+      ]
+    },
+    {
+      "anyOf": [
+        {
+          "required": [
+            "html"
+          ]
+        },
+        {
+          "required": [
+            "testo"
+          ]
+        },
+        {
+          "required": [
+            "text"
+          ]
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "Allegato": {
+      "type": "object",
+      "required": [
+        "nome",
+        "contenuto"
+      ],
+      "properties": {
+        "nome": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "File name. Alias: `filename`. Executable files (.exe, .js, .bat…) are refused."
+        },
+        "contenuto": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "description": "Base64 content. Alias: `content`."
+        },
+        "tipo": {
+          "type": "string",
+          "description": "MIME type, for example application/pdf. Alias: `content_type`. Default: application/octet-stream."
+        }
+      }
+    }
+  }
+}

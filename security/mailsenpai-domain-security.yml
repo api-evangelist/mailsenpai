@@ -1,0 +1,16 @@
+generated: '2026-10-12'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: en.mailsenpai.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 28 12:31:16 2026 GMT
+  hsts: false
+domains:
+- domain: mailsenpai.com
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: reject

@@ -1,0 +1,247 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai Website forms API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: Website forms
+paths:
+  /relay/f/{codice}:
+    servers:
+    - url: https://app.mailsenpai.com
+      description: Form endpoint host
+    parameters:
+    - name: codice
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[A-Za-z0-9]{6,32}$
+      description: The form code, copied from the customer area.
+    get:
+      operationId: moduloInfo
+      tags:
+      - Website forms
+      security: []
+      summary: Reminder of how to use the address
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuloInfo'
+              example:
+                ok: true
+                modulo: Contatti sito
+                come: Punta qui l'attributo action del tuo form, con method="POST".
+                campi:
+                - _subject
+                - _replyto
+                - _next
+                - _cc
+                - _gotcha
+                - _format
+        '404':
+          description: Form not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: modulo non trovato
+    post:
+      operationId: moduloInvia
+      tags:
+      - Website forms
+      security: []
+      summary: Receives a submission from your website form
+      description: 'No key: the address is public by nature and is protected by restricting it to your domains (form setting). It answers in JSON if the request has `Accept: application/json`, `X-Requested-With: XMLHttpRequest` or a JSON body; otherwise, with a classic browser submission, it redirects with 303 to `_next` (or the page set in the form) or shows a confirmation page. Every delivered email counts towards the monthly volume.'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ModuloCampi'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ModuloCampi'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuloCampi'
+            example:
+              nome: Mario Rossi
+              email: mario@esempio.it
+              messaggio: Vorrei un preventivo
+              _subject: Richiesta dal sito
+              _gotcha: ''
+      responses:
+        '200':
+          description: Received (JSON), or HTML confirmation page for classic submissions without a thank-you page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+                  messaggio:
+                    type: string
+              example:
+                ok: true
+                messaggio: Grazie, il messaggio è arrivato.
+            text/html:
+              schema:
+                type: string
+        '303':
+          description: 'Classic submission: redirect to the thank-you page.'
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '400':
+          description: 'Classic submission failed: HTML page with the reason.'
+          content:
+            text/html:
+              schema:
+                type: string
+        '403':
+          description: Form paused, service not active or website not allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: questo modulo non è abilitato per www.altrosito.it
+        '404':
+          description: Form not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: modulo non trovato
+        '409':
+          description: No verified sending domain yet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: il servizio non ha ancora un dominio di invio verificato
+        '422':
+          description: No field filled in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: il modulo è arrivato vuoto
+        '429':
+          description: More than 25 submissions in an hour from the same network, or monthly volume used up.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'troppi invii ravvicinati: riprova fra qualche minuto'
+        '502':
+          description: Delivery failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'non siamo riusciti a consegnare la risposta: riprova'
+    options:
+      operationId: moduloPreflight
+      tags:
+      - Website forms
+      security: []
+      summary: CORS preflight for JavaScript submissions
+      responses:
+        '204':
+          description: Allowed from any origin; POST and OPTIONS methods; Content-Type and Accept headers.
+components:
+  schemas:
+    ModuloInfo:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          const: true
+        modulo:
+          type: string
+        come:
+          type: string
+        campi:
+          type: array
+          items:
+            type: string
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
+    ModuloCampi:
+      type: object
+      description: 'All the fields of your form (max 60, max 5,000 characters each). Names starting with `_` are reserved: only the listed ones are used, others are ignored. File uploads are not supported.'
+      additionalProperties:
+        type: string
+      properties:
+        _subject:
+          type: string
+          description: Subject of the email you receive.
+        _replyto:
+          type: string
+          format: email
+          description: Reply address. If missing, the first field with «mail» in its name and a valid address is used.
+        _next:
+          type: string
+          format: uri
+          description: Thank-you page (full http/https address) for classic submissions.
+        _cc:
+          type: string
+          format: email
+          description: Copy to another address, only if allowed in the form settings.
+        _gotcha:
+          type: string
+          description: 'Honeypot field to keep empty and hidden: if filled, the submission is silently discarded.'
+        _format:
+          type: string
+          enum:
+          - plain
+          description: '`plain` to receive the email as plain text.'
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

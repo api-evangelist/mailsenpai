@@ -1,0 +1,286 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai Suppression API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: Suppression
+paths:
+  /soppressi:
+    get:
+      operationId: soppressi
+      tags:
+      - Suppression
+      summary: Addresses and domains we no longer email
+      parameters:
+      - name: quanti
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: cerca
+        in: query
+        schema:
+          type: string
+        description: Part of the address to search for.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+                  totale:
+                    type: integer
+                    description: Total entries on the list (ignores `cerca`).
+                  elenco:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Soppresso'
+              example:
+                ok: true
+                totale: 2
+                elenco:
+                - supp_id: '501'
+                  relay_id: '12'
+                  email: mario@esempio.it
+                  reason: bounce
+                  note: 5.1.1 user unknown
+                  created_at: '2026-10-01 08:42:10'
+                - supp_id: '488'
+                  relay_id: '12'
+                  email: '@concorrente.it'
+                  reason: manuale
+                  note: ''
+                  created_at: '2026-09-20 10:00:00'
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          $ref: '#/components/responses/Sospeso'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+  /sopprimi:
+    post:
+      operationId: sopprimi
+      tags:
+      - Suppression
+      summary: Add an address or a domain to the suppression list
+      description: 'For a whole domain write `@domain.com` or `domain.com`. If the entry was already there it still returns `ok: true` with `gia_presente: true`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                  example: mario@esempio.it
+                nota:
+                  type: string
+                  maxLength: 255
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                nota:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Esito'
+              example:
+                ok: true
+                email: mario@esempio.it
+                gia_presente: false
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          $ref: '#/components/responses/Sospeso'
+        '400':
+          description: Invalid entry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: serve un indirizzo email o un dominio (@dominio.it)
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+  /riammetti:
+    post:
+      operationId: riammetti
+      tags:
+      - Suppression
+      summary: Remove from the list an entry you added yourself
+      description: 'Write the entry exactly as it appears on the list (domains with the at sign, `@domain.com`). Addresses that entered because of a bounce or a spam report should not be re-admitted from here: ask for a review in the customer area. Entries added because of a bounce or a spam report return 409; an entry that is not there returns 404.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+                  example: mario@esempio.it
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+              - email
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: '`ok: true` if the entry existed and was removed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Esito'
+              example:
+                ok: true
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          $ref: '#/components/responses/Sospeso'
+        '404':
+          description: Entry not on the list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: indirizzo non presente in elenco
+        '409':
+          description: 'Entry blocked by our servers: ask for a review from the customer area.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'questo indirizzo è stato bloccato dai nostri server (bounce): puoi chiederne lo sblocco dall''area cliente'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+components:
+  schemas:
+    Esito:
+      type: object
+      required:
+      - ok
+      properties:
+        ok:
+          type: boolean
+    Soppresso:
+      type: object
+      properties:
+        supp_id:
+          type: string
+          pattern: ^\d+$
+        relay_id:
+          type: string
+          pattern: ^\d+$
+        email:
+          type: string
+          description: Address, or a whole domain written `@domain.com`.
+        reason:
+          type: string
+          enum:
+          - bounce
+          - complaint
+          - manuale
+        note:
+          type: string
+        created_at:
+          type: string
+          example: '2026-09-30 14:03:51'
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
+  responses:
+    Sospeso:
+      description: Account suspended (plan expired or unpaid, volume used up without continuity, spending cap reached…). The message states the reason.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: 'servizio sospeso: volume del mese esaurito. Controlla il tuo piano nell''area cliente.'
+    ChiaveNonValida:
+      description: Missing or invalid key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: chiave non valida
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

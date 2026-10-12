@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mailsenpai/main/json-schema/mailsenpai-stato-schema.json",
+  "title": "Stato",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mailsenpai-openapi.json#/components/schemas/Stato",
+  "type": "object",
+  "required": [
+    "ok",
+    "stato",
+    "smtp",
+    "volume",
+    "tracciamento",
+    "soppressi"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "const": true
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active"
+      ],
+      "description": "`pending` = account created, being activated; `active` = live. A suspended account never gets here: it receives 403."
+    },
+    "smtp": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "type": "string"
+        },
+        "porta": {
+          "type": "integer"
+        },
+        "porta_alternativa": {
+          "type": "integer"
+        },
+        "utente": {
+          "type": "string"
+        },
+        "sicurezza": {
+          "type": "string",
+          "const": "STARTTLS"
+        }
+      }
+    },
+    "volume": {
+      "type": "object",
+      "properties": {
+        "mese": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}$"
+        },
+        "incluso": {
+          "type": "integer",
+          "description": "Emails included in the month."
+        },
+        "usato": {
+          "type": "integer",
+          "description": "Emails already counted this month (delivered or bounced)."
+        },
+        "residuo": {
+          "type": "integer"
+        },
+        "per_ora": {
+          "type": "integer",
+          "description": "Hourly pace of the plan: above it messages wait in the queue, they are not rejected."
+        }
+      }
+    },
+    "tracciamento": {
+      "type": "boolean",
+      "description": "True if open and click tracking is active."
+    },
+    "soppressi": {
+      "type": "integer",
+      "description": "Entries on the suppression list."
+    }
+  }
+}

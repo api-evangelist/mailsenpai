@@ -1,0 +1,221 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai Webhooks API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: Webhooks
+paths:
+  /webhook:
+    get:
+      operationId: webhookLeggi
+      tags:
+      - Webhooks
+      summary: Webhook settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  webhook:
+                    $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+    post:
+      operationId: webhookImposta
+      tags:
+      - Webhooks
+      summary: Set or turn off the webhook
+      description: Every chosen event arrives as a signed JSON POST; if your server does not answer 2xx we retry for about 24 hours (1 min, 5 min, 30 min, 2 h, 6 h, 12 h). Public https addresses only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                eventi:
+                  type: array
+                  items:
+                    type: string
+                events:
+                  type: array
+                  items:
+                    type: string
+                  description: Alias of `eventi`.
+                attivo:
+                  type: boolean
+                active:
+                  type: boolean
+                nuovo_segreto:
+                  type: boolean
+                rotate_secret:
+                  type: boolean
+            example:
+              url: https://tuosito.it/webhook/mailsenpai
+              eventi:
+              - delivered
+              - bounce
+              - complaint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  webhook:
+                    $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+        '422':
+          description: Address not https or not public, or no valid event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: l'indirizzo deve essere pubblico
+  /webhook/prova:
+    post:
+      operationId: webhookProva
+      tags:
+      - Webhooks
+      summary: Send a test event right away
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example:
+                ok: true
+                codice_http: 200
+                errore: ''
+        '502':
+          description: Your server did not answer 2xx.
+          content:
+            application/json:
+              example:
+                ok: false
+                codice_http: 500
+                errore: risposta HTTP 500
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+components:
+  responses:
+    ChiaveNonValida:
+      description: Missing or invalid key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: chiave non valida
+  schemas:
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
+    Webhook:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Public https address. Empty = off.
+        eventi:
+          type: array
+          items:
+            type: string
+            enum:
+            - delivered
+            - bounce
+            - defer
+            - complaint
+            - open
+            - click
+            - dropped
+            - sent
+        attivo:
+          type: boolean
+        segreto:
+          type: string
+          description: 'Only in the POST response: `whsec_…`, to verify the signature.'
+        tipi_possibili:
+          type: array
+          items:
+            type: string
+        ultime_24_ore:
+          type: object
+          properties:
+            consegnati:
+              type: integer
+            in_attesa:
+              type: integer
+            falliti:
+              type: integer
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

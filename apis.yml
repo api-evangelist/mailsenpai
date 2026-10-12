@@ -1,32 +1,266 @@
 aid: mailsenpai
 name: SMTP Senpai (MailSenpai)
-description: 'SMTP Senpai (MailSenpai) is a company surfaced via the API Evangelist harvest backlog (source:
-  new-submission) and added to the network as a stub for full-pipeline profiling.'
+image: https://en.mailsenpai.com/wp-content/uploads/2026/10/mailsenpai-og-en.jpg
+description: 'MailSenpai is an Italian email service for businesses, operating since 2016 with servers and data hosted in the European Union.
+  It offers two products: an email marketing platform for newsletters and campaigns, and SMTP Senpai, a transactional email relay service with
+  REST API and SMTP access. The service supports Italian and English support, provides DKIM signing, SPF/DKIM/DMARC checks, and detailed sending
+  logs. Plans are tiered with a free trial and pricing in euros, targeting B2B outreach and marketing automation.'
 url: https://raw.githubusercontent.com/api-evangelist/mailsenpai/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:new-submission
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-12 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-10-12'
 modified: '2026-10-12'
 tags:
-- Company
-apis: []
+- Email marketing
+- B2B outreach
+- SMTP relay
+- Artificial intelligence
+- Newsletter platform
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/mailsenpai-agentic-access.yml
+- type: Plans
+  url: plans/mailsenpai-plans-pricing.yml
+- type: Spectral
+  url: rules/mailsenpai-rules.yml
+- type: JSONLD
+  url: json-ld/mailsenpai-context.jsonld
+- type: Vocabulary
+  url: vocabulary/mailsenpai-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Webhooks
+  url: asyncapi/mailsenpai-webhooks.yml
+- type: DataModel
+  url: data-model/mailsenpai-data-model.yml
+- type: Idempotency
+  url: conventions/mailsenpai-conventions.yml
+- type: Conventions
+  url: conventions/mailsenpai-conventions.yml
+- type: Authentication
+  url: authentication/mailsenpai-authentication.yml
+- type: ErrorCatalog
+  url: errors/mailsenpai-problem-types.yml
+- type: Conformance
+  url: conformance/mailsenpai-conformance.yml
+- type: LLMsTxt
+  url: llms/mailsenpai-llms.txt
+- type: SecurityTxt
+  url: well-known/mailsenpai-gitlab-security.txt
+- type: WellKnown
+  url: well-known/mailsenpai-well-known.yml
+- type: Hosts
+  url: hosts/mailsenpai-hosts.yml
+- type: Vendors
+  url: vendors/mailsenpai-vendors.yml
+- type: SDKs
+  url: packages/mailsenpai-packages.yml
+- type: Packages
+  url: packages/mailsenpai-packages.yml
+- type: SignUp
+  url: https://app.mailsenpai.com/customer/guest/register?lang=en
+- type: DomainSecurity
+  url: security/mailsenpai-domain-security.yml
 - type: Website
   url: https://en.mailsenpai.com/
 - type: Documentation
   url: https://en.mailsenpai.com/smtp-api/
-x-submission-notes: OpenAPI https://www.mailsenpai.com/wp-content/uploads/api/smtp-senpai-openapi-1.1.0.en.json
-  (3.1.0, 10 paths); Bearer API key; llms.txt https://en.mailsenpai.com/llms.txt; also keyless DNS check
-  API https://en.mailsenpai.com/dns-check-api/ and remote MCP https://mcp.mailsenpai.com/mcp (OAuth) for
-  the email marketing platform. Italy, EU-hosted. Could not get past the Add form verification.
-x-submission-probe: site/docs/llms.txt/dns-check 200; OpenAPI 3.1.0 10 paths, server app.mailsenpai.com/relay/v1;
-  invented path 404
+- type: APIReference
+  url: https://en.mailsenpai.com/smtp-api/
+- type: GettingStarted
+  url: https://en.mailsenpai.com/smtp-senpai/
+- type: Support
+  url: https://en.mailsenpai.com/contact-us/
+- type: Blog
+  url: https://en.mailsenpai.com/blog/
+- type: Pricing
+  url: https://en.mailsenpai.com/plans/
+- type: TermsOfService
+  url: https://en.mailsenpai.com/tc/
+- type: PrivacyPolicy
+  url: https://en.mailsenpai.com/privacy-policy/
+apis:
+- aid: mailsenpai:mailsenpai-account-api
+  name: SMTP Senpai (MailSenpai) Account API
+  description: The Account API from SMTP Senpai (MailSenpai) — 1 operation(s) for account.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-account-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+- aid: mailsenpai:mailsenpai-log-api
+  name: SMTP Senpai (MailSenpai) Log API
+  description: The Log API from SMTP Senpai (MailSenpai) — 2 operation(s) for log.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - Log
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-log-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+- aid: mailsenpai:mailsenpai-sending-api
+  name: SMTP Senpai (MailSenpai) Sending API
+  description: The Sending API from SMTP Senpai (MailSenpai) — 1 operation(s) for sending.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - Sending
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-sending-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+- aid: mailsenpai:mailsenpai-smtp-senpai-api-api
+  name: SMTP Senpai (MailSenpai) SMTP Senpai API
+  description: >-
+    The SMTP Senpai API API from SMTP Senpai (MailSenpai) — 0 operation(s) for smtp senpai api.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - SMTP Senpai API
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-smtp-senpai-api-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+- aid: mailsenpai:mailsenpai-suppression-api
+  name: SMTP Senpai (MailSenpai) Suppression API
+  description: The Suppression API from SMTP Senpai (MailSenpai) — 3 operation(s) for suppression.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - Suppression
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-suppression-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+- aid: mailsenpai:mailsenpai-webhooks-api
+  name: SMTP Senpai (MailSenpai) Webhooks API
+  description: The Webhooks API from SMTP Senpai (MailSenpai) — 2 operation(s) for webhooks.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-webhooks-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+- aid: mailsenpai:mailsenpai-website-forms-api
+  name: SMTP Senpai (MailSenpai) Website forms API
+  description: The Website forms API from SMTP Senpai (MailSenpai) — 1 operation(s) for website forms.
+  humanURL: https://en.mailsenpai.com/smtp-api/
+  baseURL: https://app.mailsenpai.com/relay/v1
+  tags:
+  - Website forms
+  properties:
+  - type: OpenAPI
+    url: openapi/mailsenpai-website-forms-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-richiesta-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-stato-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-modulo-campi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-evento-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-invio-multi-schema.json
+  - type: JSONSchema
+    url: json-schema/mailsenpai-conteggi-schema.json
+x-submission-notes: OpenAPI https://www.mailsenpai.com/wp-content/uploads/api/smtp-senpai-openapi-1.1.0.en.json (3.1.0, 10 paths); Bearer API
+  key; llms.txt https://en.mailsenpai.com/llms.txt; also keyless DNS check API https://en.mailsenpai.com/dns-check-api/ and remote MCP https://mcp.mailsenpai.com/mcp
+  (OAuth) for the email marketing platform. Italy, EU-hosted. Could not get past the Add form verification.
+x-submission-probe: site/docs/llms.txt/dns-check 200; OpenAPI 3.1.0 10 paths, server app.mailsenpai.com/relay/v1; invented path 404
 x-submitted-by: info@mailsenpai.com (email, 2026-10-09)
+x-coverage:
+  state: unreadable
+  reason: no-machine-readable-spec
+  method: derived
+  generated: '2026-10-12'
+  generator: derive-coverage.py (pre-flight evidence)
+  detail: the company publishes developer documentation but serves no machine-readable contract from it
+  evidence:
+  - url: https://en.mailsenpai.com/
+    status: 200
+x-enrichment:
+  date: '2026-10-12'
+  status: enriched
+  artifacts_added: 40
+  pass: modular-v1
+  engine: identity=local,contract=local,surfaces=local,docs=local,regulatory=local

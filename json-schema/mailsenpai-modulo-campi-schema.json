@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mailsenpai/main/json-schema/mailsenpai-modulo-campi-schema.json",
+  "title": "ModuloCampi",
+  "description": "All the fields of your form (max 60, max 5,000 characters each). Names starting with `_` are reserved: only the listed ones are used, others are ignored. File uploads are not supported.",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mailsenpai-openapi.json#/components/schemas/ModuloCampi",
+  "type": "object",
+  "additionalProperties": {
+    "type": "string"
+  },
+  "properties": {
+    "_subject": {
+      "type": "string",
+      "description": "Subject of the email you receive."
+    },
+    "_replyto": {
+      "type": "string",
+      "format": "email",
+      "description": "Reply address. If missing, the first field with «mail» in its name and a valid address is used."
+    },
+    "_next": {
+      "type": "string",
+      "format": "uri",
+      "description": "Thank-you page (full http/https address) for classic submissions."
+    },
+    "_cc": {
+      "type": "string",
+      "format": "email",
+      "description": "Copy to another address, only if allowed in the form settings."
+    },
+    "_gotcha": {
+      "type": "string",
+      "description": "Honeypot field to keep empty and hidden: if filled, the submission is silently discarded."
+    },
+    "_format": {
+      "type": "string",
+      "enum": [
+        "plain"
+      ],
+      "description": "`plain` to receive the email as plain text."
+    }
+  }
+}

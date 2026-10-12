@@ -1,0 +1,300 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai Log API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: Log
+paths:
+  /statistiche:
+    get:
+      operationId: statistiche
+      tags:
+      - Log
+      summary: Summary of the last days
+      parameters:
+      - name: giorni
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 90
+          default: 30
+        description: Out-of-range values are clamped to 1-90.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+                  giorni:
+                    type: integer
+                  dati:
+                    $ref: '#/components/schemas/Conteggi'
+                  per_giorno:
+                    description: Counts by date and type (at most the last 30 days). With no activity it is an empty array `[]`.
+                    oneOf:
+                    - type: object
+                      additionalProperties:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                    - type: array
+                      maxItems: 0
+              example:
+                ok: true
+                giorni: 7
+                dati:
+                  sent: 812
+                  delivered: 798
+                  bounce: 9
+                  defer: 14
+                  complaint: 0
+                  tracciamento: not active
+                  tasso_consegna: 98.3
+                  tasso_rimbalzo: 1.11
+                  tasso_segnalazioni: 0.0
+                per_giorno:
+                  '2026-09-30':
+                    delivered: 120
+                    bounce: 2
+                  '2026-10-01':
+                    sent: 95
+                    delivered: 93
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          $ref: '#/components/responses/Sospeso'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+  /eventi:
+    get:
+      operationId: eventi
+      tags:
+      - Log
+      summary: 'Events: the latest, or what is new after a cursor'
+      description: 'Without `dopo`: the latest events, newest first (at most 500). With `dopo`: the events after that id, oldest first, with `prossimo` to pass in the next call. The log covers 90 days.'
+      parameters:
+      - name: tipo
+        in: query
+        schema:
+          $ref: '#/components/schemas/TipoEvento'
+        description: Filter by type. `open` and `click` require tracking (otherwise 403).
+      - name: quanti
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 50
+      - name: dopo
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+        description: 'Cursor: `event_id` of the last event already read (0 to start from the beginning). Alias: `after`.'
+      - name: after
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+        description: Alias of `dopo`.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+        description: Alias of `quanti`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+                  eventi:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Evento'
+                  prossimo:
+                    type: string
+                    description: 'Only with `dopo`: value to use as `dopo` in the next call.'
+                  altri:
+                    type: boolean
+                    description: 'Only with `dopo`: true if there are more events to read right away.'
+              example:
+                ok: true
+                eventi:
+                - event_id: '88213'
+                  relay_id: '12'
+                  type: bounce
+                  email: mario@esempio.it
+                  domain: esempio.it
+                  from_domain: tuodominio.it
+                  code: '550'
+                  reason: 5.1.1 user unknown
+                  message_id: ''
+                  url: ''
+                  happened_at: '2026-10-01 08:42:10'
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          description: You asked for opens or clicks without tracking, or the account is suspended.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'servizio sospeso: piano scaduto. Controlla il tuo piano nell''area cliente.'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+components:
+  schemas:
+    TipoEvento:
+      type: string
+      enum:
+      - sent
+      - delivered
+      - bounce
+      - defer
+      - complaint
+      - open
+      - click
+      - dropped
+      description: '`sent` accepted via API or form · `delivered` delivered · `bounce` permanent rejection · `defer` deferred, will retry · `complaint` spam report · `open`/`click` with tracking · `dropped` not sent because the recipient is on the suppression list.'
+    Evento:
+      type: object
+      description: Log row. Treat ids as text; dates are UTC in `YYYY-MM-DD HH:MM:SS` format.
+      properties:
+        event_id:
+          type: string
+          pattern: ^\d+$
+        relay_id:
+          type: string
+          pattern: ^\d+$
+        type:
+          $ref: '#/components/schemas/TipoEvento'
+        email:
+          type: string
+          description: Recipient.
+        domain:
+          type: string
+          description: Recipient domain.
+        from_domain:
+          type: string
+        code:
+          type: string
+          description: Code returned by the recipient server, if any.
+        reason:
+          type: string
+          description: Readable reason (bounces, deferrals, drops).
+        message_id:
+          type: string
+        url:
+          type: string
+          description: Clicked link (click events only).
+        happened_at:
+          type: string
+          example: '2026-10-01 08:42:10'
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
+    Conteggi:
+      type: object
+      properties:
+        sent:
+          type: integer
+        delivered:
+          type: integer
+        bounce:
+          type: integer
+        defer:
+          type: integer
+        complaint:
+          type: integer
+        open:
+          type: integer
+          description: Only with tracking active (unique recipients).
+        click:
+          type: integer
+          description: Only with tracking active (unique recipients).
+        tracciamento:
+          type: string
+          description: Present instead of open/click when tracking is not active.
+        tasso_consegna:
+          type: number
+          description: Percentage, one decimal place.
+        tasso_rimbalzo:
+          type: number
+        tasso_segnalazioni:
+          type: number
+  responses:
+    Sospeso:
+      description: Account suspended (plan expired or unpaid, volume used up without continuity, spending cap reached…). The message states the reason.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: 'servizio sospeso: volume del mese esaurito. Controlla il tuo piano nell''area cliente.'
+    ChiaveNonValida:
+      description: Missing or invalid key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: chiave non valida
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

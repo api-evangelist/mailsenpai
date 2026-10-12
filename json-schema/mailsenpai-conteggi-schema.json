@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/mailsenpai/main/json-schema/mailsenpai-conteggi-schema.json",
+  "title": "Conteggi",
+  "x-generated": "2026-10-12",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/mailsenpai-openapi.json#/components/schemas/Conteggi",
+  "type": "object",
+  "properties": {
+    "sent": {
+      "type": "integer"
+    },
+    "delivered": {
+      "type": "integer"
+    },
+    "bounce": {
+      "type": "integer"
+    },
+    "defer": {
+      "type": "integer"
+    },
+    "complaint": {
+      "type": "integer"
+    },
+    "open": {
+      "type": "integer",
+      "description": "Only with tracking active (unique recipients)."
+    },
+    "click": {
+      "type": "integer",
+      "description": "Only with tracking active (unique recipients)."
+    },
+    "tracciamento": {
+      "type": "string",
+      "description": "Present instead of open/click when tracking is not active."
+    },
+    "tasso_consegna": {
+      "type": "number",
+      "description": "Percentage, one decimal place."
+    },
+    "tasso_rimbalzo": {
+      "type": "number"
+    },
+    "tasso_segnalazioni": {
+      "type": "number"
+    }
+  }
+}

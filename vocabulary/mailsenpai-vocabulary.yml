@@ -1,0 +1,95 @@
+generated: '2026-10-12'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/mailsenpai-openapi.json
+vocabulary:
+  name: SMTP Senpai (MailSenpai) Domain Vocabulary
+  description: 'Terms declared by SMTP Senpai (MailSenpai)''s own API contract: its resource groups, objects and enumerations, with the contract''s
+    definitions. Derived, not authored.'
+  version: '2026-10-12'
+  terms:
+  - term: Errore
+    definition: 'Object declared by the contract with fields: ok, errore.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Errore
+  - term: Stato
+    definition: 'Object declared by the contract with fields: ok, stato, smtp, volume, tracciamento, soppressi.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Stato
+  - term: InvioRichiesta
+    definition: 'One or more recipients (up to 50): each one gets their own copy. Italian names take precedence over the English aliases if you
+      send both.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/InvioRichiesta
+  - term: InvioOk
+    definition: 'Object declared by the contract with fields: ok, inviato, id_messaggio, residuo, oltre_il_piano.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/InvioOk
+  - term: InvioSoppresso
+    definition: 'Object declared by the contract with fields: ok, inviato, motivo.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/InvioSoppresso
+  - term: Conteggi
+    definition: 'Object declared by the contract with fields: sent, delivered, bounce, defer, complaint, open, click, tracciamento, tasso_consegna,
+      tasso_rimbalzo, tasso_segnalazioni.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Conteggi
+  - term: Evento
+    definition: Log row. Treat ids as text; dates are UTC in `YYYY-MM-DD HH:MM:SS` format.
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Evento
+  - term: TipoEvento
+    definition: '`sent` accepted via API or form · `delivered` delivered · `bounce` permanent rejection · `defer` deferred, will retry · `complaint`
+      spam report · `open`/`click` with tracking · `dropped` not sent because the recipient is on the suppression list.'
+    tags:
+    - Enumeration
+    source: openapi/mailsenpai-openapi.json#/components/schemas/TipoEvento
+  - term: Soppresso
+    definition: 'Object declared by the contract with fields: supp_id, relay_id, email, reason, note, created_at.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Soppresso
+  - term: Esito
+    definition: 'Object declared by the contract with fields: ok.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Esito
+  - term: ModuloInfo
+    definition: 'Object declared by the contract with fields: ok, modulo, come, campi.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/ModuloInfo
+  - term: ModuloCampi
+    definition: 'All the fields of your form (max 60, max 5,000 characters each). Names starting with `_` are reserved: only the listed ones are
+      used, others are ignored. File uploads are not supported.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/ModuloCampi
+  - term: Allegato
+    definition: 'Object declared by the contract with fields: nome, contenuto, tipo.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Allegato
+  - term: InvioMulti
+    definition: Response when `a` is a list.
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/InvioMulti
+  - term: Webhook
+    definition: 'Object declared by the contract with fields: url, eventi, attivo, segreto, tipi_possibili, ultime_24_ore.'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/Webhook
+  - term: EventoWebhook
+    definition: 'Body of the POST we send to your address. Headers: X-MailSenpai-Event, X-MailSenpai-Delivery, X-MailSenpai-Signature (t=,v1=."
+      with the secret>).'
+    tags:
+    - Object
+    source: openapi/mailsenpai-openapi.json#/components/schemas/EventoWebhook

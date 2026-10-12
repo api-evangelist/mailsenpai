@@ -1,0 +1,103 @@
+# MailSenpai
+
+> MailSenpai is an Italian email service for businesses, running since 2016, with servers and data in the European Union and support in Italian and English (ticket and email). It has two separate products: the MailSenpai email marketing platform (newsletters, campaigns, automations) and SMTP Senpai, the SMTP relay service for the transactional email of apps, websites and business software. The two products have different prices, trials and terms: do not mix them up.
+
+Italian version of the site (main site): https://www.mailsenpai.com/ (llms.txt: https://www.mailsenpai.com/llms.txt)
+
+## SMTP Senpai (SMTP service for transactional email)
+
+- What it is: an SMTP relay for order confirmations, invoices, password resets, notifications, reminders and website forms. The customer's software keeps writing its emails and delivers them through SMTP Senpai's servers.
+- Connection: server relay.mailsenpai.com, port 2525 with STARTTLS, personal username and password. Alternatively a REST API with a key (send, result, statistics, do-not-contact list).
+- Website forms: an address to put in the form's "action" (even on a static site); every submission arrives by email, with anti-bot filter, auto-reply, archive and CSV export.
+- Customer's domain: DKIM signing on the customer's domain; MailSenpai provides and checks the SPF, DKIM and DMARC records.
+- Sending log: 90 days, line by line (delivered, bounced with the reason, deferred, reported). Monthly report compared with the previous period.
+- Bounces and complaints: no automatic suspension for crossing a threshold. Problem addresses go on the do-not-contact list and don't use up the volume; the customer gets alerts and advice on what to fix.
+- Trial: 14 days free, €0 on the day of activation, card required; up to 100 emails a day. Reminder 3 days before the end; cancel from the customer area.
+- Pricing (VAT excluded, annual plan): 10,000 emails a month €12.90/month; 20,000 €22.90/month; 50,000 €35.02/month; 100,000 €43.10/month. 3-month plan: 10,000 emails at €25.80/month.
+- Volume: alerts at 50, 80 and 100%; when the volume runs out the customer chooses to stop or keep sending in blocks of 1,000 emails up to a spending cap. Dedicated IP from €15/month (included from 150,000 emails a month).
+- Servers and data in the European Union. Prices in euro.
+
+Pages:
+- [SMTP Senpai](https://en.mailsenpai.com/smtp-senpai/): main service page, technical details, pricing and FAQ
+- [EU alternative to SendGrid](https://en.mailsenpai.com/eu-sendgrid-alternative/), [EU alternative to Mailgun](https://en.mailsenpai.com/eu-mailgun-alternative/), [EU alternative to Amazon SES](https://en.mailsenpai.com/eu-amazon-ses-alternative/): row-by-row comparisons with official sources for every competitor fact, including when the competitor is the better fit (prices checked on 7 October 2026)
+- [Start the SMTP Senpai trial](https://app.mailsenpai.com/checkout/en?relay=1&prova=1&mesi=12&volume=10)
+- [SMTP for Supabase and AI-built apps](https://en.mailsenpai.com/smtp-supabase/): step-by-step guide to Supabase Auth custom SMTP
+- [European SMTP alternative](https://en.mailsenpai.com/european-smtp-alternative/): switch SMTP provider by changing four settings, testing side by side with the current provider
+- [Free email DNS checker](https://en.mailsenpai.com/email-dns-checker/): checks SPF, DKIM, DMARC and MX of any domain, shows the result right away and emails a report in English with the fixes; no DNS access, no card
+- [Free email spam test](https://en.mailsenpai.com/email-spam-test/): send a real email to a test address and get a 0 to 10 score with every check explained (SPF, DKIM, DMARC, blocklists, sending server, headers, content, the verdict of a real spam filter) and what to fix; free, 3 tests a day, company email required; the score is not a promise of inbox placement; also available from the MailSenpai MCP server (tools start_email_spam_test and get_email_spam_test_result)
+- [Free blacklist check](https://en.mailsenpai.com/blacklist-check/): checks whether an IP or domain is on an email blocklist (15 lists, each one named, with the official removal link); free monitor for up to 50 entries, rechecked every 12 hours, email alerts only when something changes; no account, company email required for the monitor; also available as the check_blacklist tool of the MailSenpai MCP server
+- Single free checks with an instant result: [SPF checker](https://en.mailsenpai.com/spf-checker/), [DKIM checker](https://en.mailsenpai.com/dkim-checker/) (custom selector supported), [DMARC checker](https://en.mailsenpai.com/dmarc-checker/), [MX lookup](https://en.mailsenpai.com/mx-lookup/), [554 5.7.1 error](https://en.mailsenpai.com/554-5-7-1-error/): causes and fixes of the policy rejection
+- [Free email tools](https://en.mailsenpai.com/free-tools/): index of all checkers and generators; [SPF record generator](https://en.mailsenpai.com/spf-generator/), [DMARC record generator](https://en.mailsenpai.com/dmarc-generator/), [Email header analyzer](https://en.mailsenpai.com/email-header-analyzer/) (all in the browser), [DNS check widget](https://en.mailsenpai.com/dns-check-widget/) to embed on other websites
+- [Hosting email sending limits](https://en.mailsenpai.com/hosting-email-sending-limits/): how many emails Hostinger, GoDaddy, Bluehost, SiteGround, IONOS, OVHcloud, Namecheap, HostGator, hosting.com and DreamHost let you send, each with its official page (checked on 9 October 2026)
+- SMTP Senpai integration guides (server relay.mailsenpai.com, port 2525, STARTTLS): [WordPress and WooCommerce](https://en.mailsenpai.com/wordpress-smtp/), [Laravel](https://en.mailsenpai.com/laravel-smtp/), [Node.js and Nodemailer](https://en.mailsenpai.com/nodemailer-smtp/) (in Nodemailer just use service: 'MailSenpai'), [Django](https://en.mailsenpai.com/django-smtp/), [Strapi](https://en.mailsenpai.com/strapi-smtp/), [n8n](https://en.mailsenpai.com/n8n-smtp/), [PrestaShop](https://en.mailsenpai.com/prestashop-smtp/), [Joomla](https://en.mailsenpai.com/joomla-smtp/), [Drupal](https://en.mailsenpai.com/drupal-smtp/), [OpenCart](https://en.mailsenpai.com/opencart-smtp/), [Magento 2 and Adobe Commerce](https://en.mailsenpai.com/magento-smtp/), [Craft CMS](https://en.mailsenpai.com/craft-cms-smtp/), [Statamic](https://en.mailsenpai.com/statamic-smtp/), [TYPO3](https://en.mailsenpai.com/typo3-smtp/), [October CMS](https://en.mailsenpai.com/october-cms-smtp/)
+- [Free DNS check API](https://en.mailsenpai.com/dns-check-api/): JSON, no key, CORS enabled, 30 checks per hour per IP (GET https://app.mailsenpai.com/tools/dns-check?domain=example.com); also available as the check_domain_dns tool of the MailSenpai MCP server; OpenAPI 3.1 description: https://www.mailsenpai.com/wp-content/uploads/api/mailsenpai-dns-check-openapi-1.0.0.yaml
+- [Free blacklist check API](https://en.mailsenpai.com/blacklist-check-api/): JSON, no key, CORS enabled, 9 blocklists, 10 checks per hour per IP (GET https://app.mailsenpai.com/tools/blacklist-check?target=203.0.113.10); also available as the check_blacklist tool of the MailSenpai MCP server; OpenAPI 3.1 description: https://www.mailsenpai.com/wp-content/uploads/api/mailsenpai-blacklist-check-openapi-1.0.0.yaml
+- [apis.json](https://en.mailsenpai.com/apis.json): machine-readable index of the public MailSenpai APIs (DNS check, blacklist check, SMTP Senpai), each with its documentation and OpenAPI description
+- Other step-by-step guides, currently in Italian only: [contact form via email](https://www.mailsenpai.com/modulo-contatti-email/), [Microsoft 365 SMTP AUTH for printers and business software](https://www.mailsenpai.com/smtp-microsoft-365/)
+
+## API compatibility (SMTP Senpai)
+
+- SMTP Senpai also accepts send requests in the same format as 14 transactional email APIs: SendGrid (v3 Mail Send), Mailgun (Messages), Postmark, Resend, Brevo (transactional), Mailjet (Send v3.1), SparkPost (Transmissions), Mandrill / Mailchimp Transactional, MailerSend, Amazon SES (v2 and v1, SigV4), Elastic Email (v4), SMTP2GO, Postal and Plunk. Change the base URL (https://app.mailsenpai.com/relay/compat/<service>) or the host (<service>-api.mailsenpai.com) and use the msp_ key; paths, fields, responses and error shapes stay those of the original API.
+- Limits: templates, scheduled sending and contact lists of the original services are not supported (refused with the native error); events and webhooks come from the SMTP Senpai API (GET https://app.mailsenpai.com/relay/v1/eventi or a signed webhook); up to 50 recipients per message, 500 copies per request.
+- [Migrate to SMTP Senpai](https://en.mailsenpai.com/migrate-to-smtp-senpai/): table of the 14 formats with base URL, dedicated host and where the key goes, with one page per service (for example [SendGrid](https://en.mailsenpai.com/sendgrid-api-compatible/), [Mailgun](https://en.mailsenpai.com/mailgun-api-compatible/), [Postmark](https://en.mailsenpai.com/postmark-api-compatible/), [Amazon SES](https://en.mailsenpai.com/amazon-ses-api-compatible/), [Resend](https://en.mailsenpai.com/resend-api-compatible/))
+- [SMTP Senpai API documentation](https://en.mailsenpai.com/smtp-api/): REST API, events, webhooks, suppressions, SMTP
+- [OpenAPI 1.2.0 specification (YAML)](https://www.mailsenpai.com/wp-content/uploads/api/smtp-senpai-openapi-1.2.0.en.yaml): /relay/v1, up to 500 recipients per call (above 50 queued, response 202), List-Unsubscribe One-Click and Feedback-ID headers; also as [JSON](https://www.mailsenpai.com/wp-content/uploads/api/smtp-senpai-openapi-1.2.0.en.json)
+- [Integrations](https://en.mailsenpai.com/integrations/): libraries and SDKs (Node.js, Python, Ruby, Symfony), packages for Laravel, NestJS, Strapi, Payload, Medusa and Directus, Make app, n8n community node, Activepieces piece, MCP server for AI assistants, REST and compatible APIs, SMTP guides
+
+## Libraries, SDKs and plugins (SMTP Senpai)
+
+Official open source packages for the SMTP Senpai API. Source code: https://gitlab.com/smtp-senpai
+
+- Node.js SDK: `npm install @mailsenpai/smtp-senpai` ([npm](https://www.npmjs.com/package/@mailsenpai/smtp-senpai), [source](https://gitlab.com/smtp-senpai/mailsenpai-js))
+- Python SDK, with a Django email backend (`mailsenpai.django.EmailBackend`) and a CrewAI tool: `pip install mailsenpai` ([PyPI](https://pypi.org/project/mailsenpai/), [source](https://gitlab.com/smtp-senpai/mailsenpai-python))
+- Ruby gem, with an ActionMailer delivery method for Rails (`:mailsenpai`): `gem install mailsenpai` ([RubyGems](https://rubygems.org/gems/mailsenpai), [source](https://gitlab.com/smtp-senpai/mailsenpai-ruby))
+- Symfony Mailer transport: `composer require mailsenpai/symfony-mailer symfony/http-client` ([Packagist](https://packagist.org/packages/mailsenpai/symfony-mailer), [source](https://gitlab.com/smtp-senpai/symfony-mailer))
+- Laravel 12 and 13 mail transport: `composer require mailsenpai/laravel` ([Packagist](https://packagist.org/packages/mailsenpai/laravel), [source](https://gitlab.com/smtp-senpai/laravel))
+- NestJS 10, 11 and 12 module: `npm install @mailsenpai/nestjs` ([npm](https://www.npmjs.com/package/@mailsenpai/nestjs), [source](https://gitlab.com/smtp-senpai/mailsenpai-js))
+- Strapi 4 and 5 email provider: `npm install strapi-provider-email-smtp-senpai` ([npm](https://www.npmjs.com/package/strapi-provider-email-smtp-senpai))
+- Payload CMS 3 email adapter: `npm install @mailsenpai/payload-email` ([npm](https://www.npmjs.com/package/@mailsenpai/payload-email))
+- Medusa 2 notification provider: `npm install medusa-plugin-smtp-senpai` ([npm](https://www.npmjs.com/package/medusa-plugin-smtp-senpai))
+- Directus Flow operation: `npm install directus-extension-smtp-senpai` ([npm](https://www.npmjs.com/package/directus-extension-smtp-senpai))
+- n8n community node (self-hosted n8n, Settings > Community Nodes > Install): `n8n-nodes-mailsenpai` ([npm](https://www.npmjs.com/package/n8n-nodes-mailsenpai), [source](https://gitlab.com/smtp-senpai/n8n-nodes-mailsenpai))
+- Activepieces piece (Activepieces 0.82 or later, Install Piece > NPM, then enter the package name): `@mailsenpai/activepieces-piece-smtp-senpai` ([npm](https://www.npmjs.com/package/@mailsenpai/activepieces-piece-smtp-senpai), [source](https://gitlab.com/smtp-senpai/mailsenpai-js))
+- WordPress plugin "SMTP Senpai": under review for the WordPress.org plugin directory; source code at https://gitlab.com/smtp-senpai/wordpress-smtp-senpai
+- PrestaShop module "SMTP Senpai" (free, PrestaShop 1.7.6 to 9, API key or SMTP, test email, sender domain check): [guide](https://en.mailsenpai.com/prestashop-smtp/), [zip](https://www.mailsenpai.com/wp-content/uploads/smtp-senpai/smtp-senpai-prestashop-1.0.1.zip)
+- Joomla plugin "SMTP Senpai" (free, Joomla 4.4, 5 and 6, API key or SMTP): [guide](https://en.mailsenpai.com/joomla-smtp/), [zip](https://www.mailsenpai.com/wp-content/uploads/smtp-senpai/plg_system_smtpsenpai_v1.0.0.zip)
+- Drupal module "SMTP Senpai" (free, Drupal 10.3+ and 11, sending with the API key): [guide](https://en.mailsenpai.com/drupal-smtp/), [zip](https://www.mailsenpai.com/wp-content/uploads/smtp-senpai/smtp-senpai-drupal-1.0.0.zip)
+- OpenCart extension "SMTP Senpai" (free, OpenCart 3.0, 4.0.2 and 4.1, API key or SMTP): [guide](https://en.mailsenpai.com/opencart-smtp/), [zip for OpenCart 4](https://www.mailsenpai.com/wp-content/uploads/smtp-senpai/opencart-4/1.0.0/smtp_senpai.ocmod.zip), [zip for OpenCart 3](https://www.mailsenpai.com/wp-content/uploads/smtp-senpai/smtp-senpai-oc3-1.0.0.ocmod.zip)
+- Make: SMTP Senpai app, installed from the invitation link on the [Integrations](https://en.mailsenpai.com/integrations/) page
+
+## MailSenpai email marketing platform
+
+- What it is: a newsletter and email campaign platform for SMEs, freelancers and agencies: drag & drop editor with 1,000+ responsive templates, lists and segmentation, A/B tests, autoresponders and automations, sending statistics, API, additional sender domains, dedicated IP, deliverability support.
+- AI assistant (MCP): MailSenpai has an official remote MCP server (https://mcp.mailsenpai.com/mcp, official MCP Registry id com.mailsenpai/mcp, OAuth 2.1 with PKCE). From Claude, ChatGPT, Cursor or any client that supports remote MCP servers you can manage lists, subscribers, segments and templates, create draft campaigns and read their stats by chatting; sending and deleting need explicit confirmation. The server costs nothing extra: AI access is included in the free 30-day demo and is an extension of the Smart plan.
+- Free trial (demo): 30 days without a credit card, up to 500 emails a day and 15,000 in total, with campaign approval and own lists collected with consent.
+- Plans (VAT excluded): Basic €13.49/month on an annual plan (10,000 emails a month); Plus €89.49/month on an annual plan (270,000 emails a month, dedicated IP); Smart, custom (annual, semi-annual or quarterly) with optional extensions; pay-as-you-go for some extensions.
+- B2B: integration with Bancomail business databases for B2B email marketing.
+
+Pages:
+- [Home](https://en.mailsenpai.com/): platform overview and AI assistant
+- [Features](https://en.mailsenpai.com/services/)
+- [Plans and pricing](https://en.mailsenpai.com/plans/): free demo, Basic, Plus, Smart and extensions price list
+- [Calculate your plan](https://en.mailsenpai.com/calculate-your-plan/): configurator and online purchase
+- [B2B email marketing with Bancomail](https://en.mailsenpai.com/email-marketing-b2b/)
+- [Platform for high volumes](https://en.mailsenpai.com/platform-for-high-volume-data/)
+- [Email marketing MCP server](https://en.mailsenpai.com/email-marketing-mcp-server/): use MailSenpai from Claude, ChatGPT and Cursor, with examples, connection steps and controls
+- [MailSenpai vs Mailchimp](https://en.mailsenpai.com/mailsenpai-vs-mailchimp/), [MailSenpai vs Brevo](https://en.mailsenpai.com/mailsenpai-vs-brevo/), [MailSenpai vs MailUp](https://en.mailsenpai.com/mailsenpai-vs-mailup/): comparisons
+
+## Company and terms
+
+- [About us](https://en.mailsenpai.com/about-us/)
+- [Contact us](https://en.mailsenpai.com/contact-us/): support by ticket and email, in English and Italian, Monday to Friday
+- [Infrastructure and data security](https://en.mailsenpai.com/infrastructure-and-security/)
+- [SLA](https://en.mailsenpai.com/sla/)
+- [Terms and conditions](https://en.mailsenpai.com/tc/) (SMTP Senpai: articles 12-bis and 12-ter)
+- [Acceptable use policy](https://en.mailsenpai.com/acceptable-use-policy/): recipient consent, prohibited content, what happens if the rules are broken (summary of the terms)
+- [Privacy policy](https://en.mailsenpai.com/privacy-policy/)
+
+## Resources
+
+- [Blog](https://en.mailsenpai.com/blog/): guides on email marketing, deliverability, automation and regulations
+- [IP or domain blacklisted? How to check and what to do](https://en.mailsenpai.com/ip-or-domain-blacklisted-what-to-do/): what an email blocklist is, why senders get listed and the steps to get removed, in the right order
+- [Email spam score: how to read it and what to fix first](https://en.mailsenpai.com/email-spam-score-how-to-read-it/): how a spam filter score works, how to read a 0 to 10 result and where to start fixing
+- [Sitemap](https://en.mailsenpai.com/sitemap.xml)

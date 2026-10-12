@@ -1,0 +1,75 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: SMTP Senpai API
+paths: {}
+webhooks:
+  eventoRelay:
+    post:
+      summary: Relay event (to your address)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventoWebhook'
+      responses:
+        '200':
+          description: Answer 2xx within 8 seconds.
+      tags:
+      - SMTP Senpai API
+components:
+  schemas:
+    EventoWebhook:
+      type: object
+      description: 'Body of the POST we send to your address. Headers: X-MailSenpai-Event, X-MailSenpai-Delivery, X-MailSenpai-Signature (t=<unix>,v1=<HMAC-SHA256 of "<t>.<body>" with the secret>).'
+      properties:
+        id:
+          type: string
+          example: evt_88214
+        type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+            domain:
+              type: string
+            from_domain:
+              type: string
+            code:
+              type: string
+            reason:
+              type: string
+            message_id:
+              type: string
+            url:
+              type: string
+        account:
+          type: string
+        test:
+          type: boolean
+          description: Only in test events.
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

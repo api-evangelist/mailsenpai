@@ -1,0 +1,27 @@
+generated: '2026-10-12'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://en.mailsenpai.com/infrastructure-and-security/
+sources:
+- https://en.mailsenpai.com/infrastructure-and-security/
+- https://en.mailsenpai.com/privacy-policy/
+standards:
+- id: gdpr
+  conforms: true
+  evidence: This evaluation complies with Article 28 of the GDPR for data processing conducted by designated Data Processors.
+- id: openapi-3.1
+  conforms: true
+  evidence: the document declares 3.1.0
+- id: oauth2
+  conforms: false
+  evidence: 'securitySchemes: chiaveBearer (http)'
+- id: rfc9457
+  conforms: false
+  evidence: no response declares application/problem+json
+- id: idempotency
+  conforms: true
+  evidence: Idempotency-Key declared on 1 of 6 mutating operations (partial)
+- id: pagination
+  conforms: true
+  evidence: list operations take limit
+docs: https://en.mailsenpai.com/infrastructure-and-security/

@@ -1,0 +1,161 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai Account API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: Account
+paths:
+  /stato:
+    get:
+      operationId: stato
+      tags:
+      - Account
+      summary: SMTP credentials, monthly volume and account status
+      description: 'Does not return the SMTP password: you read and change it in the customer area.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stato'
+              example:
+                ok: true
+                stato: active
+                smtp:
+                  server: relay.mailsenpai.com
+                  porta: 2525
+                  porta_alternativa: 2525
+                  utente: r1234@tuodominio.it
+                  sicurezza: STARTTLS
+                volume:
+                  mese: 2026-10
+                  incluso: 10000
+                  usato: 1240
+                  residuo: 8760
+                  per_ora: 400
+                tracciamento: false
+                soppressi: 17
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          description: Account suspended (the message says why) or being activated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'servizio in attivazione: stiamo preparando il tuo account, riprova tra qualche minuto'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+components:
+  schemas:
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
+    Stato:
+      type: object
+      required:
+      - ok
+      - stato
+      - smtp
+      - volume
+      - tracciamento
+      - soppressi
+      properties:
+        ok:
+          type: boolean
+          const: true
+        stato:
+          type: string
+          enum:
+          - pending
+          - active
+          description: '`pending` = account created, being activated; `active` = live. A suspended account never gets here: it receives 403.'
+        smtp:
+          type: object
+          properties:
+            server:
+              type: string
+              example: relay.mailsenpai.com
+            porta:
+              type: integer
+              example: 2525
+            porta_alternativa:
+              type: integer
+              example: 2525
+            utente:
+              type: string
+              example: r1234@tuodominio.it
+            sicurezza:
+              type: string
+              const: STARTTLS
+        volume:
+          type: object
+          properties:
+            mese:
+              type: string
+              pattern: ^\d{4}-\d{2}$
+              example: 2026-10
+            incluso:
+              type: integer
+              description: Emails included in the month.
+            usato:
+              type: integer
+              description: Emails already counted this month (delivered or bounced).
+            residuo:
+              type: integer
+            per_ora:
+              type: integer
+              description: 'Hourly pace of the plan: above it messages wait in the queue, they are not rejected.'
+        tracciamento:
+          type: boolean
+          description: True if open and click tracking is active.
+        soppressi:
+          type: integer
+          description: Entries on the suppression list.
+  responses:
+    ChiaveNonValida:
+      description: Missing or invalid key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: chiave non valida
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

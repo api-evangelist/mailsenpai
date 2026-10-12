@@ -1,0 +1,19 @@
+generated: '2026-10-12'
+method: probed
+signals: []
+source: https://en.mailsenpai.com/privacy-policy/
+posture:
+  data_retention:
+    evidence:
+      source: https://en.mailsenpai.com/privacy-policy/
+      http_status: 200
+      fetched: true
+      quote: "7 Retention of Personal Data"
+      note: Section outlines retention policies for personal data.
+  data_subject_request:
+    evidence:
+      source: https://en.mailsenpai.com/privacy-policy/
+      http_status: 200
+      fetched: true
+      quote: "You have the right to ask MailSenpai, at any time:"
+      note: Describes rights of data subjects to request access, correction, deletion, etc.

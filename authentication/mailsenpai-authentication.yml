@@ -1,0 +1,14 @@
+generated: '2026-10-12'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://www.mailsenpai.com/smtp-microsoft-365/
+sources:
+- https://www.mailsenpai.com/smtp-microsoft-365/
+description: Authentication methods as published on the page.
+schemes:
+- type: other
+  name: SMTP AUTH (username/password)
+  evidence: Accesso utente e password Utente dalla tua area
+  location: body
+  how_to_obtain: Username and password are provided in the user area of MailSenpai.
+docs: https://www.mailsenpai.com/smtp-microsoft-365/

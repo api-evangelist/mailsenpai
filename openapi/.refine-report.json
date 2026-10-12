@@ -1,0 +1,27 @@
+{
+  "provider": "mailsenpai",
+  "sources": [
+    "mailsenpai-openapi.json"
+  ],
+  "outputs": [
+    "mailsenpai-account-api-openapi.yml",
+    "mailsenpai-log-api-openapi.yml",
+    "mailsenpai-smtp-senpai-api-api-openapi.yml",
+    "mailsenpai-sending-api-openapi.yml",
+    "mailsenpai-suppression-api-openapi.yml",
+    "mailsenpai-webhooks-api-openapi.yml",
+    "mailsenpai-website-forms-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/mailsenpai-openapi.json"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "mailsenpai-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "mailsenpai-openapi.json: tagged webhooks POST eventoRelay -> SMTP Senpai API",
+    "mailsenpai-openapi.json: declared missing tag: SMTP Senpai API",
+    "apis.yml register: written (+7 apis, 7 total)"
+  ],
+  "skipped": []
+}

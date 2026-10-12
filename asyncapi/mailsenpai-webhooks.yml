@@ -1,0 +1,15 @@
+generated: '2026-10-12'
+method: derived
+generator: derive-webhooks.py
+source:
+- openapi/mailsenpai-openapi.json
+description: 'Event surface derived from the provider''s own OpenAPI: webhooks. No AsyncAPI document is published by the provider; this catalog
+  lists the events the contract names.'
+management_operations:
+- webhookLeggi
+- webhookImposta
+- webhookProva
+events:
+- event: eventoRelay
+  description: Relay event (to your address)
+  declared_in: webhooks

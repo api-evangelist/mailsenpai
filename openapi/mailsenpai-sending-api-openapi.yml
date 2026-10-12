@@ -1,0 +1,418 @@
+openapi: 3.2.0
+info:
+  title: SMTP Senpai Sending API
+  version: 1.1.0
+  summary: Transactional email sending, log, suppression list and website forms.
+  description: 'REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.'
+  contact:
+    name: MailSenpai
+    url: https://en.mailsenpai.com/smtp-api/
+servers:
+- url: https://app.mailsenpai.com/relay/v1
+security:
+- chiaveBearer: []
+tags:
+- name: Sending
+paths:
+  /invio:
+    post:
+      operationId: invio
+      tags:
+      - Sending
+      summary: Send an email to one or more recipients
+      description: 'Up to 50 recipients per call, each with their own copy; attachments up to 10 files and 10 MB. CC and BCC only over SMTP. The sender must be on a verified domain. Suppressed recipients are held (`dropped` event). With the `Idempotency-Key` header the same request repeated within 24 hours returns the first response (with `Idempotent-Replayed: true`) without sending again.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvioRichiesta'
+            examples:
+              italiano:
+                summary: Italian field names
+                value:
+                  a: cliente@esempio.it
+                  da: ordini@tuodominio.it
+                  nome_mittente: Il tuo negozio
+                  oggetto: Conferma ordine 10293
+                  html: <p>Grazie, il tuo ordine è confermato.</p>
+                  rispondi_a: assistenza@tuodominio.it
+                  intestazioni:
+                    X-Ordine: '10293'
+              inglese:
+                summary: English aliases
+                value:
+                  to: customer@example.com
+                  from: orders@yourdomain.com
+                  from_name: Your shop
+                  subject: Order 10293 confirmed
+                  text: Thanks, your order is confirmed.
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InvioRichiesta'
+      responses:
+        '200':
+          description: Accepted, or held because the recipient is suppressed.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/InvioOk'
+                - $ref: '#/components/schemas/InvioSoppresso'
+                - $ref: '#/components/schemas/InvioMulti'
+              examples:
+                inviata:
+                  value:
+                    ok: true
+                    inviato: true
+                    id_messaggio: 9f2c4e1a7b3d5f6e8a9b0c1d@tuodominio.it
+                    residuo: 8759
+                    oltre_il_piano: false
+                soppressa:
+                  value:
+                    ok: true
+                    inviato: false
+                    motivo: indirizzo nella lista di soppressione
+          headers:
+            Idempotent-Replayed:
+              schema:
+                type: string
+                const: 'true'
+              description: Present when the response is the stored one of an identical request.
+        '400':
+          description: Missing or invalid data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: destinatario non valido
+        '401':
+          $ref: '#/components/responses/ChiaveNonValida'
+        '403':
+          description: Sender on an unverified domain, or account suspended.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: il dominio esempio.com non risulta fra quelli verificati per il tuo account
+        '429':
+          description: Monthly volume used up and sending continuity off (or spending cap reached).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErroreVolume'
+              example:
+                ok: false
+                errore: 'volume del mese esaurito: aumenta il piano o accendi la continuità di invio dalla tua area'
+                residuo: 0
+                aumenta: https://app.mailsenpai.com/customer/il-mio-piano
+                pannello: https://app.mailsenpai.com/customer/relay-smtp
+        '502':
+          description: 'The sending server did not accept the message or could not be reached: the text reports the reply received.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'il server di invio ha risposto: 451 4.3.0 errore temporaneo'
+        '405':
+          description: 'HTTP method not allowed: the Allow header gives the right one.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'metodo non ammesso: usa GET'
+        '409':
+          description: A request with the same Idempotency-Key is still in progress.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: una richiesta con la stessa Idempotency-Key è ancora in corso
+        '413':
+          description: Attachments over 10 MB.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: 'allegati troppo grandi: al massimo 10 MB in tutto'
+        '422':
+          description: Idempotency-Key already used with different data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errore'
+              example:
+                ok: false
+                errore: questa Idempotency-Key è già stata usata nelle ultime 24 ore con dati diversi
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+          pattern: ^[\x21-\x7E]+$
+        description: Your own key (for example the order id), valid for 24 hours.
+components:
+  schemas:
+    InvioOk:
+      type: object
+      required:
+      - ok
+      - inviato
+      - id_messaggio
+      properties:
+        ok:
+          type: boolean
+          const: true
+        inviato:
+          type: boolean
+          const: true
+        id_messaggio:
+          type: string
+          description: Identifier given to the message; it is also its Message-ID (without angle brackets).
+          example: 9f2c4e1a7b3d5f6e8a9b0c1d@tuodominio.it
+        residuo:
+          type: integer
+          description: Estimate of the volume left this month.
+        oltre_il_piano:
+          type: boolean
+          description: True if the included volume was used up and the email went out thanks to sending continuity.
+    ErroreVolume:
+      allOf:
+      - $ref: '#/components/schemas/Errore'
+      - type: object
+        properties:
+          residuo:
+            type: integer
+            const: 0
+          aumenta:
+            type: string
+            format: uri
+            description: Customer-area page where you can raise the volume.
+          pannello:
+            type: string
+            format: uri
+            description: Customer-area page with usage and sending continuity.
+    InvioRichiesta:
+      type: object
+      description: 'One or more recipients (up to 50): each one gets their own copy. Italian names take precedence over the English aliases if you send both.'
+      properties:
+        a:
+          oneOf:
+          - type: string
+            format: email
+          - type: array
+            items:
+              type: string
+              format: email
+            minItems: 1
+            maxItems: 50
+          description: Recipient, or a list of up to 50 recipients.
+        to:
+          oneOf:
+          - type: string
+            format: email
+          - type: array
+            items:
+              type: string
+              format: email
+            minItems: 1
+            maxItems: 50
+          description: Alias of `a`.
+        da:
+          type: string
+          format: email
+          description: 'Sender: must be on a verified domain of your account (subdomains are accepted).'
+        from:
+          type: string
+          format: email
+          description: Alias of `da`.
+        nome_mittente:
+          type: string
+          description: Sender display name.
+        from_name:
+          type: string
+          description: Alias of `nome_mittente`.
+        oggetto:
+          type: string
+          minLength: 1
+        subject:
+          type: string
+          description: Alias of `oggetto`.
+        html:
+          type: string
+          description: HTML body. If the text part is missing, it is derived from the HTML.
+        testo:
+          type: string
+          description: Plain-text body.
+        text:
+          type: string
+          description: Alias of `testo`.
+        rispondi_a:
+          type: string
+          format: email
+          description: Reply-To address. Ignored if it is not a valid address.
+        reply_to:
+          type: string
+          format: email
+          description: Alias of `rispondi_a`.
+        intestazioni:
+          type: object
+          additionalProperties:
+            type: string
+          description: Custom headers. Only `X-…` names pass (letters, digits and hyphens, max 40 characters after `X-`); others are dropped silently.
+          example:
+            X-Ordine: A-10293
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Alias of `intestazioni`.
+        allegati:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/Allegato'
+          description: Up to 10 files and 10 MB in total (after decoding).
+        attachments:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/Allegato'
+          description: Alias of `allegati`.
+      allOf:
+      - anyOf:
+        - required:
+          - a
+        - required:
+          - to
+      - anyOf:
+        - required:
+          - da
+        - required:
+          - from
+      - anyOf:
+        - required:
+          - oggetto
+        - required:
+          - subject
+      - anyOf:
+        - required:
+          - html
+        - required:
+          - testo
+        - required:
+          - text
+    InvioSoppresso:
+      type: object
+      required:
+      - ok
+      - inviato
+      - motivo
+      properties:
+        ok:
+          type: boolean
+          const: true
+        inviato:
+          type: boolean
+          const: false
+        motivo:
+          type: string
+          example: indirizzo nella lista di soppressione
+    Allegato:
+      type: object
+      required:
+      - nome
+      - contenuto
+      properties:
+        nome:
+          type: string
+          maxLength: 150
+          description: 'File name. Alias: `filename`. Executable files (.exe, .js, .bat…) are refused.'
+        contenuto:
+          type: string
+          contentEncoding: base64
+          description: 'Base64 content. Alias: `content`.'
+        tipo:
+          type: string
+          description: 'MIME type, for example application/pdf. Alias: `content_type`. Default: application/octet-stream.'
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
+    InvioMulti:
+      type: object
+      required:
+      - ok
+      - inviati
+      - risultati
+      description: Response when `a` is a list.
+      properties:
+        ok:
+          type: boolean
+          const: true
+        inviati:
+          type: integer
+        non_inviati:
+          type: integer
+        risultati:
+          type: array
+          items:
+            type: object
+            properties:
+              a:
+                type: string
+              inviato:
+                type: boolean
+              id_messaggio:
+                type: string
+              motivo:
+                type: string
+                description: Why it was not sent (suppression).
+              errore:
+                type: string
+                description: Sending server error or volume used up for that recipient.
+        residuo:
+          type: integer
+        oltre_il_piano:
+          type: boolean
+  responses:
+    ChiaveNonValida:
+      description: Missing or invalid key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: chiave non valida
+  securitySchemes:
+    chiaveBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: msp_…
+      description: '`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs.'
+externalDocs:
+  description: Documentation with examples
+  url: https://en.mailsenpai.com/smtp-api/

@@ -1,0 +1,2174 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SMTP Senpai API",
+    "version": "1.1.0",
+    "summary": "Transactional email sending, log, suppression list and website forms.",
+    "description": "REST API of SMTP Senpai, the MailSenpai relay. Every response is JSON with an `ok` field; on errors there is also `errore`, with an Italian message. You find the key in the customer area, SMTP Senpai page. Call it from your server: the API does not accept browser requests (no CORS), except the form endpoint.",
+    "contact": {
+      "name": "MailSenpai",
+      "url": "https://en.mailsenpai.com/smtp-api/"
+    }
+  },
+  "externalDocs": {
+    "description": "Documentation with examples",
+    "url": "https://en.mailsenpai.com/smtp-api/"
+  },
+  "servers": [
+    {
+      "url": "https://app.mailsenpai.com/relay/v1"
+    }
+  ],
+  "security": [
+    {
+      "chiaveBearer": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Sending"
+    },
+    {
+      "name": "Account"
+    },
+    {
+      "name": "Log"
+    },
+    {
+      "name": "Webhooks"
+    },
+    {
+      "name": "Suppression"
+    },
+    {
+      "name": "Website forms"
+    }
+  ],
+  "paths": {
+    "/stato": {
+      "get": {
+        "operationId": "stato",
+        "tags": [
+          "Account"
+        ],
+        "summary": "SMTP credentials, monthly volume and account status",
+        "description": "Does not return the SMTP password: you read and change it in the customer area.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stato"
+                },
+                "example": {
+                  "ok": true,
+                  "stato": "active",
+                  "smtp": {
+                    "server": "relay.mailsenpai.com",
+                    "porta": 2525,
+                    "porta_alternativa": 2525,
+                    "utente": "r1234@tuodominio.it",
+                    "sicurezza": "STARTTLS"
+                  },
+                  "volume": {
+                    "mese": "2026-10",
+                    "incluso": 10000,
+                    "usato": 1240,
+                    "residuo": 8760,
+                    "per_ora": 400
+                  },
+                  "tracciamento": false,
+                  "soppressi": 17
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "description": "Account suspended (the message says why) or being activated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "servizio in attivazione: stiamo preparando il tuo account, riprova tra qualche minuto"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invio": {
+      "post": {
+        "operationId": "invio",
+        "tags": [
+          "Sending"
+        ],
+        "summary": "Send an email to one or more recipients",
+        "description": "Up to 50 recipients per call, each with their own copy; attachments up to 10 files and 10 MB. CC and BCC only over SMTP. The sender must be on a verified domain. Suppressed recipients are held (`dropped` event). With the `Idempotency-Key` header the same request repeated within 24 hours returns the first response (with `Idempotent-Replayed: true`) without sending again.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvioRichiesta"
+              },
+              "examples": {
+                "italiano": {
+                  "summary": "Italian field names",
+                  "value": {
+                    "a": "cliente@esempio.it",
+                    "da": "ordini@tuodominio.it",
+                    "nome_mittente": "Il tuo negozio",
+                    "oggetto": "Conferma ordine 10293",
+                    "html": "<p>Grazie, il tuo ordine è confermato.</p>",
+                    "rispondi_a": "assistenza@tuodominio.it",
+                    "intestazioni": {
+                      "X-Ordine": "10293"
+                    }
+                  }
+                },
+                "inglese": {
+                  "summary": "English aliases",
+                  "value": {
+                    "to": "customer@example.com",
+                    "from": "orders@yourdomain.com",
+                    "from_name": "Your shop",
+                    "subject": "Order 10293 confirmed",
+                    "text": "Thanks, your order is confirmed."
+                  }
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/InvioRichiesta"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted, or held because the recipient is suppressed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/InvioOk"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvioSoppresso"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvioMulti"
+                    }
+                  ]
+                },
+                "examples": {
+                  "inviata": {
+                    "value": {
+                      "ok": true,
+                      "inviato": true,
+                      "id_messaggio": "9f2c4e1a7b3d5f6e8a9b0c1d@tuodominio.it",
+                      "residuo": 8759,
+                      "oltre_il_piano": false
+                    }
+                  },
+                  "soppressa": {
+                    "value": {
+                      "ok": true,
+                      "inviato": false,
+                      "motivo": "indirizzo nella lista di soppressione"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Idempotent-Replayed": {
+                "schema": {
+                  "type": "string",
+                  "const": "true"
+                },
+                "description": "Present when the response is the stored one of an identical request."
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "destinatario non valido"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "description": "Sender on an unverified domain, or account suspended.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "il dominio esempio.com non risulta fra quelli verificati per il tuo account"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Monthly volume used up and sending continuity off (or spending cap reached).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErroreVolume"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "volume del mese esaurito: aumenta il piano o accendi la continuità di invio dalla tua area",
+                  "residuo": 0,
+                  "aumenta": "https://app.mailsenpai.com/customer/il-mio-piano",
+                  "pannello": "https://app.mailsenpai.com/customer/relay-smtp"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The sending server did not accept the message or could not be reached: the text reports the reply received.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "il server di invio ha risposto: 451 4.3.0 errore temporaneo"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A request with the same Idempotency-Key is still in progress.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "una richiesta con la stessa Idempotency-Key è ancora in corso"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Attachments over 10 MB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "allegati troppo grandi: al massimo 10 MB in tutto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Idempotency-Key already used with different data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "questa Idempotency-Key è già stata usata nelle ultime 24 ore con dati diversi"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "pattern": "^[\\x21-\\x7E]+$"
+            },
+            "description": "Your own key (for example the order id), valid for 24 hours."
+          }
+        ]
+      }
+    },
+    "/statistiche": {
+      "get": {
+        "operationId": "statistiche",
+        "tags": [
+          "Log"
+        ],
+        "summary": "Summary of the last days",
+        "parameters": [
+          {
+            "name": "giorni",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 30
+            },
+            "description": "Out-of-range values are clamped to 1-90."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "giorni": {
+                      "type": "integer"
+                    },
+                    "dati": {
+                      "$ref": "#/components/schemas/Conteggi"
+                    },
+                    "per_giorno": {
+                      "description": "Counts by date and type (at most the last 30 days). With no activity it is an empty array `[]`.",
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        {
+                          "type": "array",
+                          "maxItems": 0
+                        }
+                      ]
+                    }
+                  }
+                },
+                "example": {
+                  "ok": true,
+                  "giorni": 7,
+                  "dati": {
+                    "sent": 812,
+                    "delivered": 798,
+                    "bounce": 9,
+                    "defer": 14,
+                    "complaint": 0,
+                    "tracciamento": "not active",
+                    "tasso_consegna": 98.3,
+                    "tasso_rimbalzo": 1.11,
+                    "tasso_segnalazioni": 0.0
+                  },
+                  "per_giorno": {
+                    "2026-09-30": {
+                      "delivered": 120,
+                      "bounce": 2
+                    },
+                    "2026-10-01": {
+                      "sent": 95,
+                      "delivered": 93
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "$ref": "#/components/responses/Sospeso"
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eventi": {
+      "get": {
+        "operationId": "eventi",
+        "tags": [
+          "Log"
+        ],
+        "summary": "Events: the latest, or what is new after a cursor",
+        "description": "Without `dopo`: the latest events, newest first (at most 500). With `dopo`: the events after that id, oldest first, with `prossimo` to pass in the next call. The log covers 90 days.",
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TipoEvento"
+            },
+            "description": "Filter by type. `open` and `click` require tracking (otherwise 403)."
+          },
+          {
+            "name": "quanti",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 50
+            }
+          },
+          {
+            "name": "dopo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Cursor: `event_id` of the last event already read (0 to start from the beginning). Alias: `after`."
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Alias of `dopo`."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "description": "Alias of `quanti`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "eventi": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Evento"
+                      }
+                    },
+                    "prossimo": {
+                      "type": "string",
+                      "description": "Only with `dopo`: value to use as `dopo` in the next call."
+                    },
+                    "altri": {
+                      "type": "boolean",
+                      "description": "Only with `dopo`: true if there are more events to read right away."
+                    }
+                  }
+                },
+                "example": {
+                  "ok": true,
+                  "eventi": [
+                    {
+                      "event_id": "88213",
+                      "relay_id": "12",
+                      "type": "bounce",
+                      "email": "mario@esempio.it",
+                      "domain": "esempio.it",
+                      "from_domain": "tuodominio.it",
+                      "code": "550",
+                      "reason": "5.1.1 user unknown",
+                      "message_id": "",
+                      "url": "",
+                      "happened_at": "2026-10-01 08:42:10"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "description": "You asked for opens or clicks without tracking, or the account is suspended.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "servizio sospeso: piano scaduto. Controlla il tuo piano nell'area cliente."
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/soppressi": {
+      "get": {
+        "operationId": "soppressi",
+        "tags": [
+          "Suppression"
+        ],
+        "summary": "Addresses and domains we no longer email",
+        "parameters": [
+          {
+            "name": "quanti",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          },
+          {
+            "name": "cerca",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Part of the address to search for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "totale": {
+                      "type": "integer",
+                      "description": "Total entries on the list (ignores `cerca`)."
+                    },
+                    "elenco": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Soppresso"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "ok": true,
+                  "totale": 2,
+                  "elenco": [
+                    {
+                      "supp_id": "501",
+                      "relay_id": "12",
+                      "email": "mario@esempio.it",
+                      "reason": "bounce",
+                      "note": "5.1.1 user unknown",
+                      "created_at": "2026-10-01 08:42:10"
+                    },
+                    {
+                      "supp_id": "488",
+                      "relay_id": "12",
+                      "email": "@concorrente.it",
+                      "reason": "manuale",
+                      "note": "",
+                      "created_at": "2026-09-20 10:00:00"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "$ref": "#/components/responses/Sospeso"
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sopprimi": {
+      "post": {
+        "operationId": "sopprimi",
+        "tags": [
+          "Suppression"
+        ],
+        "summary": "Add an address or a domain to the suppression list",
+        "description": "For a whole domain write `@domain.com` or `domain.com`. If the entry was already there it still returns `ok: true` with `gia_presente: true`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "mario@esempio.it"
+                  },
+                  "nota": {
+                    "type": "string",
+                    "maxLength": 255
+                  }
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "nota": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Esito"
+                },
+                "example": {
+                  "ok": true,
+                  "email": "mario@esempio.it",
+                  "gia_presente": false
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "$ref": "#/components/responses/Sospeso"
+          },
+          "400": {
+            "description": "Invalid entry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "serve un indirizzo email o un dominio (@dominio.it)"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/riammetti": {
+      "post": {
+        "operationId": "riammetti",
+        "tags": [
+          "Suppression"
+        ],
+        "summary": "Remove from the list an entry you added yourself",
+        "description": "Write the entry exactly as it appears on the list (domains with the at sign, `@domain.com`). Addresses that entered because of a bounce or a spam report should not be re-admitted from here: ask for a review in the customer area. Entries added because of a bounce or a spam report return 409; an entry that is not there returns 404.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "mario@esempio.it"
+                  }
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ok: true` if the entry existed and was removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Esito"
+                },
+                "example": {
+                  "ok": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "403": {
+            "$ref": "#/components/responses/Sospeso"
+          },
+          "404": {
+            "description": "Entry not on the list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "indirizzo non presente in elenco"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Entry blocked by our servers: ask for a review from the customer area.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "questo indirizzo è stato bloccato dai nostri server (bounce): puoi chiederne lo sblocco dall'area cliente"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/relay/f/{codice}": {
+      "servers": [
+        {
+          "url": "https://app.mailsenpai.com",
+          "description": "Form endpoint host"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "codice",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{6,32}$"
+          },
+          "description": "The form code, copied from the customer area."
+        }
+      ],
+      "get": {
+        "operationId": "moduloInfo",
+        "tags": [
+          "Website forms"
+        ],
+        "security": [],
+        "summary": "Reminder of how to use the address",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuloInfo"
+                },
+                "example": {
+                  "ok": true,
+                  "modulo": "Contatti sito",
+                  "come": "Punta qui l'attributo action del tuo form, con method=\"POST\".",
+                  "campi": [
+                    "_subject",
+                    "_replyto",
+                    "_next",
+                    "_cc",
+                    "_gotcha",
+                    "_format"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Form not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "modulo non trovato"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "moduloInvia",
+        "tags": [
+          "Website forms"
+        ],
+        "security": [],
+        "summary": "Receives a submission from your website form",
+        "description": "No key: the address is public by nature and is protected by restricting it to your domains (form setting). It answers in JSON if the request has `Accept: application/json`, `X-Requested-With: XMLHttpRequest` or a JSON body; otherwise, with a classic browser submission, it redirects with 303 to `_next` (or the page set in the form) or shows a confirmation page. Every delivered email counts towards the monthly volume.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ModuloCampi"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ModuloCampi"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModuloCampi"
+              },
+              "example": {
+                "nome": "Mario Rossi",
+                "email": "mario@esempio.it",
+                "messaggio": "Vorrei un preventivo",
+                "_subject": "Richiesta dal sito",
+                "_gotcha": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Received (JSON), or HTML confirmation page for classic submissions without a thank-you page.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "messaggio": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "ok": true,
+                  "messaggio": "Grazie, il messaggio è arrivato."
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "303": {
+            "description": "Classic submission: redirect to the thank-you page.",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Classic submission failed: HTML page with the reason.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Form paused, service not active or website not allowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "questo modulo non è abilitato per www.altrosito.it"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Form not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "modulo non trovato"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "No verified sending domain yet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "il servizio non ha ancora un dominio di invio verificato"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No field filled in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "il modulo è arrivato vuoto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "More than 25 submissions in an hour from the same network, or monthly volume used up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "troppi invii ravvicinati: riprova fra qualche minuto"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Delivery failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "non siamo riusciti a consegnare la risposta: riprova"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "moduloPreflight",
+        "tags": [
+          "Website forms"
+        ],
+        "security": [],
+        "summary": "CORS preflight for JavaScript submissions",
+        "responses": {
+          "204": {
+            "description": "Allowed from any origin; POST and OPTIONS methods; Content-Type and Accept headers."
+          }
+        }
+      }
+    },
+    "/webhook": {
+      "get": {
+        "operationId": "webhookLeggi",
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Webhook settings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "webhook": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "webhookImposta",
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Set or turn off the webhook",
+        "description": "Every chosen event arrives as a signed JSON POST; if your server does not answer 2xx we retry for about 24 hours (1 min, 5 min, 30 min, 2 h, 6 h, 12 h). Public https addresses only.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "eventi": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Alias of `eventi`."
+                  },
+                  "attivo": {
+                    "type": "boolean"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "nuovo_segreto": {
+                    "type": "boolean"
+                  },
+                  "rotate_secret": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "url": "https://tuosito.it/webhook/mailsenpai",
+                "eventi": [
+                  "delivered",
+                  "bounce",
+                  "complaint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "webhook": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Address not https or not public, or no valid event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "l'indirizzo deve essere pubblico"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhook/prova": {
+      "post": {
+        "operationId": "webhookProva",
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Send a test event right away",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "ok": true,
+                  "codice_http": 200,
+                  "errore": ""
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Your server did not answer 2xx.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "ok": false,
+                  "codice_http": 500,
+                  "errore": "risposta HTTP 500"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ChiaveNonValida"
+          },
+          "405": {
+            "description": "HTTP method not allowed: the Allow header gives the right one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Errore"
+                },
+                "example": {
+                  "ok": false,
+                  "errore": "metodo non ammesso: usa GET"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "chiaveBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "msp_…",
+        "description": "`Authorization: Bearer msp_…` (the key starts with `msp_`). As an alternative the `chiave` field is accepted in the body (JSON or form). A key in the URL (`?chiave=`) is refused with 401: it would end up in logs."
+      }
+    },
+    "schemas": {
+      "Errore": {
+        "type": "object",
+        "required": [
+          "ok",
+          "errore"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": false
+          },
+          "errore": {
+            "type": "string",
+            "description": "Human-readable explanation, always in Italian."
+          }
+        }
+      },
+      "ErroreVolume": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Errore"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "residuo": {
+                "type": "integer",
+                "const": 0
+              },
+              "aumenta": {
+                "type": "string",
+                "format": "uri",
+                "description": "Customer-area page where you can raise the volume."
+              },
+              "pannello": {
+                "type": "string",
+                "format": "uri",
+                "description": "Customer-area page with usage and sending continuity."
+              }
+            }
+          }
+        ]
+      },
+      "Stato": {
+        "type": "object",
+        "required": [
+          "ok",
+          "stato",
+          "smtp",
+          "volume",
+          "tracciamento",
+          "soppressi"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "stato": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "active"
+            ],
+            "description": "`pending` = account created, being activated; `active` = live. A suspended account never gets here: it receives 403."
+          },
+          "smtp": {
+            "type": "object",
+            "properties": {
+              "server": {
+                "type": "string",
+                "example": "relay.mailsenpai.com"
+              },
+              "porta": {
+                "type": "integer",
+                "example": 2525
+              },
+              "porta_alternativa": {
+                "type": "integer",
+                "example": 2525
+              },
+              "utente": {
+                "type": "string",
+                "example": "r1234@tuodominio.it"
+              },
+              "sicurezza": {
+                "type": "string",
+                "const": "STARTTLS"
+              }
+            }
+          },
+          "volume": {
+            "type": "object",
+            "properties": {
+              "mese": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}$",
+                "example": "2026-10"
+              },
+              "incluso": {
+                "type": "integer",
+                "description": "Emails included in the month."
+              },
+              "usato": {
+                "type": "integer",
+                "description": "Emails already counted this month (delivered or bounced)."
+              },
+              "residuo": {
+                "type": "integer"
+              },
+              "per_ora": {
+                "type": "integer",
+                "description": "Hourly pace of the plan: above it messages wait in the queue, they are not rejected."
+              }
+            }
+          },
+          "tracciamento": {
+            "type": "boolean",
+            "description": "True if open and click tracking is active."
+          },
+          "soppressi": {
+            "type": "integer",
+            "description": "Entries on the suppression list."
+          }
+        }
+      },
+      "InvioRichiesta": {
+        "type": "object",
+        "description": "One or more recipients (up to 50): each one gets their own copy. Italian names take precedence over the English aliases if you send both.",
+        "properties": {
+          "a": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "minItems": 1,
+                "maxItems": 50
+              }
+            ],
+            "description": "Recipient, or a list of up to 50 recipients."
+          },
+          "to": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "minItems": 1,
+                "maxItems": 50
+              }
+            ],
+            "description": "Alias of `a`."
+          },
+          "da": {
+            "type": "string",
+            "format": "email",
+            "description": "Sender: must be on a verified domain of your account (subdomains are accepted)."
+          },
+          "from": {
+            "type": "string",
+            "format": "email",
+            "description": "Alias of `da`."
+          },
+          "nome_mittente": {
+            "type": "string",
+            "description": "Sender display name."
+          },
+          "from_name": {
+            "type": "string",
+            "description": "Alias of `nome_mittente`."
+          },
+          "oggetto": {
+            "type": "string",
+            "minLength": 1
+          },
+          "subject": {
+            "type": "string",
+            "description": "Alias of `oggetto`."
+          },
+          "html": {
+            "type": "string",
+            "description": "HTML body. If the text part is missing, it is derived from the HTML."
+          },
+          "testo": {
+            "type": "string",
+            "description": "Plain-text body."
+          },
+          "text": {
+            "type": "string",
+            "description": "Alias of `testo`."
+          },
+          "rispondi_a": {
+            "type": "string",
+            "format": "email",
+            "description": "Reply-To address. Ignored if it is not a valid address."
+          },
+          "reply_to": {
+            "type": "string",
+            "format": "email",
+            "description": "Alias of `rispondi_a`."
+          },
+          "intestazioni": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Custom headers. Only `X-…` names pass (letters, digits and hyphens, max 40 characters after `X-`); others are dropped silently.",
+            "example": {
+              "X-Ordine": "A-10293"
+            }
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Alias of `intestazioni`."
+          },
+          "allegati": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/Allegato"
+            },
+            "description": "Up to 10 files and 10 MB in total (after decoding)."
+          },
+          "attachments": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/Allegato"
+            },
+            "description": "Alias of `allegati`."
+          }
+        },
+        "allOf": [
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "a"
+                ]
+              },
+              {
+                "required": [
+                  "to"
+                ]
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "da"
+                ]
+              },
+              {
+                "required": [
+                  "from"
+                ]
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "oggetto"
+                ]
+              },
+              {
+                "required": [
+                  "subject"
+                ]
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "html"
+                ]
+              },
+              {
+                "required": [
+                  "testo"
+                ]
+              },
+              {
+                "required": [
+                  "text"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "InvioOk": {
+        "type": "object",
+        "required": [
+          "ok",
+          "inviato",
+          "id_messaggio"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "inviato": {
+            "type": "boolean",
+            "const": true
+          },
+          "id_messaggio": {
+            "type": "string",
+            "description": "Identifier given to the message; it is also its Message-ID (without angle brackets).",
+            "example": "9f2c4e1a7b3d5f6e8a9b0c1d@tuodominio.it"
+          },
+          "residuo": {
+            "type": "integer",
+            "description": "Estimate of the volume left this month."
+          },
+          "oltre_il_piano": {
+            "type": "boolean",
+            "description": "True if the included volume was used up and the email went out thanks to sending continuity."
+          }
+        }
+      },
+      "InvioSoppresso": {
+        "type": "object",
+        "required": [
+          "ok",
+          "inviato",
+          "motivo"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "inviato": {
+            "type": "boolean",
+            "const": false
+          },
+          "motivo": {
+            "type": "string",
+            "example": "indirizzo nella lista di soppressione"
+          }
+        }
+      },
+      "Conteggi": {
+        "type": "object",
+        "properties": {
+          "sent": {
+            "type": "integer"
+          },
+          "delivered": {
+            "type": "integer"
+          },
+          "bounce": {
+            "type": "integer"
+          },
+          "defer": {
+            "type": "integer"
+          },
+          "complaint": {
+            "type": "integer"
+          },
+          "open": {
+            "type": "integer",
+            "description": "Only with tracking active (unique recipients)."
+          },
+          "click": {
+            "type": "integer",
+            "description": "Only with tracking active (unique recipients)."
+          },
+          "tracciamento": {
+            "type": "string",
+            "description": "Present instead of open/click when tracking is not active."
+          },
+          "tasso_consegna": {
+            "type": "number",
+            "description": "Percentage, one decimal place."
+          },
+          "tasso_rimbalzo": {
+            "type": "number"
+          },
+          "tasso_segnalazioni": {
+            "type": "number"
+          }
+        }
+      },
+      "Evento": {
+        "type": "object",
+        "description": "Log row. Treat ids as text; dates are UTC in `YYYY-MM-DD HH:MM:SS` format.",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "relay_id": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TipoEvento"
+          },
+          "email": {
+            "type": "string",
+            "description": "Recipient."
+          },
+          "domain": {
+            "type": "string",
+            "description": "Recipient domain."
+          },
+          "from_domain": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code returned by the recipient server, if any."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Readable reason (bounces, deferrals, drops)."
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "Clicked link (click events only)."
+          },
+          "happened_at": {
+            "type": "string",
+            "example": "2026-10-01 08:42:10"
+          }
+        }
+      },
+      "TipoEvento": {
+        "type": "string",
+        "enum": [
+          "sent",
+          "delivered",
+          "bounce",
+          "defer",
+          "complaint",
+          "open",
+          "click",
+          "dropped"
+        ],
+        "description": "`sent` accepted via API or form · `delivered` delivered · `bounce` permanent rejection · `defer` deferred, will retry · `complaint` spam report · `open`/`click` with tracking · `dropped` not sent because the recipient is on the suppression list."
+      },
+      "Soppresso": {
+        "type": "object",
+        "properties": {
+          "supp_id": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "relay_id": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "email": {
+            "type": "string",
+            "description": "Address, or a whole domain written `@domain.com`."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "bounce",
+              "complaint",
+              "manuale"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2026-09-30 14:03:51"
+          }
+        }
+      },
+      "Esito": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ModuloInfo": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "modulo": {
+            "type": "string"
+          },
+          "come": {
+            "type": "string"
+          },
+          "campi": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ModuloCampi": {
+        "type": "object",
+        "description": "All the fields of your form (max 60, max 5,000 characters each). Names starting with `_` are reserved: only the listed ones are used, others are ignored. File uploads are not supported.",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {
+          "_subject": {
+            "type": "string",
+            "description": "Subject of the email you receive."
+          },
+          "_replyto": {
+            "type": "string",
+            "format": "email",
+            "description": "Reply address. If missing, the first field with «mail» in its name and a valid address is used."
+          },
+          "_next": {
+            "type": "string",
+            "format": "uri",
+            "description": "Thank-you page (full http/https address) for classic submissions."
+          },
+          "_cc": {
+            "type": "string",
+            "format": "email",
+            "description": "Copy to another address, only if allowed in the form settings."
+          },
+          "_gotcha": {
+            "type": "string",
+            "description": "Honeypot field to keep empty and hidden: if filled, the submission is silently discarded."
+          },
+          "_format": {
+            "type": "string",
+            "enum": [
+              "plain"
+            ],
+            "description": "`plain` to receive the email as plain text."
+          }
+        }
+      },
+      "Allegato": {
+        "type": "object",
+        "required": [
+          "nome",
+          "contenuto"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "File name. Alias: `filename`. Executable files (.exe, .js, .bat…) are refused."
+          },
+          "contenuto": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "description": "Base64 content. Alias: `content`."
+          },
+          "tipo": {
+            "type": "string",
+            "description": "MIME type, for example application/pdf. Alias: `content_type`. Default: application/octet-stream."
+          }
+        }
+      },
+      "InvioMulti": {
+        "type": "object",
+        "required": [
+          "ok",
+          "inviati",
+          "risultati"
+        ],
+        "description": "Response when `a` is a list.",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "inviati": {
+            "type": "integer"
+          },
+          "non_inviati": {
+            "type": "integer"
+          },
+          "risultati": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "string"
+                },
+                "inviato": {
+                  "type": "boolean"
+                },
+                "id_messaggio": {
+                  "type": "string"
+                },
+                "motivo": {
+                  "type": "string",
+                  "description": "Why it was not sent (suppression)."
+                },
+                "errore": {
+                  "type": "string",
+                  "description": "Sending server error or volume used up for that recipient."
+                }
+              }
+            }
+          },
+          "residuo": {
+            "type": "integer"
+          },
+          "oltre_il_piano": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Webhook": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public https address. Empty = off."
+          },
+          "eventi": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "delivered",
+                "bounce",
+                "defer",
+                "complaint",
+                "open",
+                "click",
+                "dropped",
+                "sent"
+              ]
+            }
+          },
+          "attivo": {
+            "type": "boolean"
+          },
+          "segreto": {
+            "type": "string",
+            "description": "Only in the POST response: `whsec_…`, to verify the signature."
+          },
+          "tipi_possibili": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ultime_24_ore": {
+            "type": "object",
+            "properties": {
+              "consegnati": {
+                "type": "integer"
+              },
+              "in_attesa": {
+                "type": "integer"
+              },
+              "falliti": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "EventoWebhook": {
+        "type": "object",
+        "description": "Body of the POST we send to your address. Headers: X-MailSenpai-Event, X-MailSenpai-Delivery, X-MailSenpai-Signature (t=<unix>,v1=<HMAC-SHA256 of \"<t>.<body>\" with the secret>).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "evt_88214"
+          },
+          "type": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "from_domain": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "message_id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          },
+          "account": {
+            "type": "string"
+          },
+          "test": {
+            "type": "boolean",
+            "description": "Only in test events."
+          }
+        }
+      }
+    },
+    "responses": {
+      "ChiaveNonValida": {
+        "description": "Missing or invalid key.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Errore"
+            },
+            "example": {
+              "ok": false,
+              "errore": "chiave non valida"
+            }
+          }
+        }
+      },
+      "Sospeso": {
+        "description": "Account suspended (plan expired or unpaid, volume used up without continuity, spending cap reached…). The message states the reason.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Errore"
+            },
+            "example": {
+              "ok": false,
+              "errore": "servizio sospeso: volume del mese esaurito. Controlla il tuo piano nell'area cliente."
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "eventoRelay": {
+      "post": {
+        "summary": "Relay event (to your address)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventoWebhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Answer 2xx within 8 seconds."
+          }
+        }
+      }
+    }
+  }
+}
