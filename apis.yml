@@ -1,0 +1,32 @@
+aid: mailsenpai
+name: SMTP Senpai (MailSenpai)
+description: 'SMTP Senpai (MailSenpai) is a company surfaced via the API Evangelist harvest backlog (source:
+  new-submission) and added to the network as a stub for full-pipeline profiling.'
+url: https://raw.githubusercontent.com/api-evangelist/mailsenpai/refs/heads/main/apis.yml
+x-type: company
+x-source: harvest:new-submission
+x-tier: stub
+x-tier-reason: harvest
+specificationVersion: '0.20'
+created: '2026-10-12'
+modified: '2026-10-12'
+tags:
+- Company
+apis: []
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
+- FN: APIs.json
+  email: info@apis.io
+common:
+- type: Website
+  url: https://en.mailsenpai.com/
+- type: Documentation
+  url: https://en.mailsenpai.com/smtp-api/
+x-submission-notes: OpenAPI https://www.mailsenpai.com/wp-content/uploads/api/smtp-senpai-openapi-1.1.0.en.json
+  (3.1.0, 10 paths); Bearer API key; llms.txt https://en.mailsenpai.com/llms.txt; also keyless DNS check
+  API https://en.mailsenpai.com/dns-check-api/ and remote MCP https://mcp.mailsenpai.com/mcp (OAuth) for
+  the email marketing platform. Italy, EU-hosted. Could not get past the Add form verification.
+x-submission-probe: site/docs/llms.txt/dns-check 200; OpenAPI 3.1.0 10 paths, server app.mailsenpai.com/relay/v1;
+  invented path 404
+x-submitted-by: info@mailsenpai.com (email, 2026-10-09)
