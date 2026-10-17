@@ -167,6 +167,22 @@ paths:
         description: Your own key (for example the order id), valid for 24 hours.
 components:
   schemas:
+    InvioSoppresso:
+      type: object
+      required:
+      - ok
+      - inviato
+      - motivo
+      properties:
+        ok:
+          type: boolean
+          const: true
+        inviato:
+          type: boolean
+          const: false
+        motivo:
+          type: string
+          example: indirizzo nella lista di soppressione
     InvioOk:
       type: object
       required:
@@ -190,6 +206,59 @@ components:
         oltre_il_piano:
           type: boolean
           description: True if the included volume was used up and the email went out thanks to sending continuity.
+    Allegato:
+      type: object
+      required:
+      - nome
+      - contenuto
+      properties:
+        nome:
+          type: string
+          maxLength: 150
+          description: 'File name. Alias: `filename`. Executable files (.exe, .js, .bat…) are refused.'
+        contenuto:
+          type: string
+          contentEncoding: base64
+          description: 'Base64 content. Alias: `content`.'
+        tipo:
+          type: string
+          description: 'MIME type, for example application/pdf. Alias: `content_type`. Default: application/octet-stream.'
+    InvioMulti:
+      type: object
+      required:
+      - ok
+      - inviati
+      - risultati
+      description: Response when `a` is a list.
+      properties:
+        ok:
+          type: boolean
+          const: true
+        inviati:
+          type: integer
+        non_inviati:
+          type: integer
+        risultati:
+          type: array
+          items:
+            type: object
+            properties:
+              a:
+                type: string
+              inviato:
+                type: boolean
+              id_messaggio:
+                type: string
+              motivo:
+                type: string
+                description: Why it was not sent (suppression).
+              errore:
+                type: string
+                description: Sending server error or volume used up for that recipient.
+        residuo:
+          type: integer
+        oltre_il_piano:
+          type: boolean
     ErroreVolume:
       allOf:
       - $ref: '#/components/schemas/Errore'
@@ -206,6 +275,18 @@ components:
             type: string
             format: uri
             description: Customer-area page with usage and sending continuity.
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
     InvioRichiesta:
       type: object
       description: 'One or more recipients (up to 50): each one gets their own copy. Italian names take precedence over the English aliases if you send both.'
@@ -316,87 +397,6 @@ components:
           - testo
         - required:
           - text
-    InvioSoppresso:
-      type: object
-      required:
-      - ok
-      - inviato
-      - motivo
-      properties:
-        ok:
-          type: boolean
-          const: true
-        inviato:
-          type: boolean
-          const: false
-        motivo:
-          type: string
-          example: indirizzo nella lista di soppressione
-    Allegato:
-      type: object
-      required:
-      - nome
-      - contenuto
-      properties:
-        nome:
-          type: string
-          maxLength: 150
-          description: 'File name. Alias: `filename`. Executable files (.exe, .js, .bat…) are refused.'
-        contenuto:
-          type: string
-          contentEncoding: base64
-          description: 'Base64 content. Alias: `content`.'
-        tipo:
-          type: string
-          description: 'MIME type, for example application/pdf. Alias: `content_type`. Default: application/octet-stream.'
-    Errore:
-      type: object
-      required:
-      - ok
-      - errore
-      properties:
-        ok:
-          type: boolean
-          const: false
-        errore:
-          type: string
-          description: Human-readable explanation, always in Italian.
-    InvioMulti:
-      type: object
-      required:
-      - ok
-      - inviati
-      - risultati
-      description: Response when `a` is a list.
-      properties:
-        ok:
-          type: boolean
-          const: true
-        inviati:
-          type: integer
-        non_inviati:
-          type: integer
-        risultati:
-          type: array
-          items:
-            type: object
-            properties:
-              a:
-                type: string
-              inviato:
-                type: boolean
-              id_messaggio:
-                type: string
-              motivo:
-                type: string
-                description: Why it was not sent (suppression).
-              errore:
-                type: string
-                description: Sending server error or volume used up for that recipient.
-        residuo:
-          type: integer
-        oltre_il_piano:
-          type: boolean
   responses:
     ChiaveNonValida:
       description: Missing or invalid key.

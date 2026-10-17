@@ -257,15 +257,6 @@ components:
           type: string
           description: Human-readable explanation, always in Italian.
   responses:
-    Sospeso:
-      description: Account suspended (plan expired or unpaid, volume used up without continuity, spending cap reached…). The message states the reason.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errore'
-          example:
-            ok: false
-            errore: 'servizio sospeso: volume del mese esaurito. Controlla il tuo piano nell''area cliente.'
     ChiaveNonValida:
       description: Missing or invalid key.
       content:
@@ -275,6 +266,15 @@ components:
           example:
             ok: false
             errore: chiave non valida
+    Sospeso:
+      description: Account suspended (plan expired or unpaid, volume used up without continuity, spending cap reached…). The message states the reason.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: 'servizio sospeso: volume del mese esaurito. Controlla il tuo piano nell''area cliente.'
   securitySchemes:
     chiaveBearer:
       type: http

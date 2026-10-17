@@ -1,7 +1,7 @@
 {
   "provider": "mailsenpai",
   "sources": [
-    "mailsenpai-openapi.json"
+    "_original/mailsenpai-openapi.json"
   ],
   "outputs": [
     "mailsenpai-account-api-openapi.yml",
@@ -12,16 +12,23 @@
     "mailsenpai-webhooks-api-openapi.yml",
     "mailsenpai-website-forms-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/mailsenpai-openapi.json"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "mailsenpai-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
     "mailsenpai-openapi.json: tagged webhooks POST eventoRelay -> SMTP Senpai API",
     "mailsenpai-openapi.json: declared missing tag: SMTP Senpai API",
-    "apis.yml register: written (+7 apis, 7 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "mailsenpai-account-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "mailsenpai-log-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "mailsenpai-sending-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "mailsenpai-smtp-senpai-api-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "mailsenpai-suppression-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "mailsenpai-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "mailsenpai-website-forms-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

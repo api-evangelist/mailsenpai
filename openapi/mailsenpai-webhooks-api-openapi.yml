@@ -160,18 +160,6 @@ components:
             ok: false
             errore: chiave non valida
   schemas:
-    Errore:
-      type: object
-      required:
-      - ok
-      - errore
-      properties:
-        ok:
-          type: boolean
-          const: false
-        errore:
-          type: string
-          description: Human-readable explanation, always in Italian.
     Webhook:
       type: object
       properties:
@@ -210,6 +198,18 @@ components:
               type: integer
             falliti:
               type: integer
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
   securitySchemes:
     chiaveBearer:
       type: http

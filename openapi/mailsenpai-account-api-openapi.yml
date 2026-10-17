@@ -66,19 +66,17 @@ paths:
                 ok: false
                 errore: 'metodo non ammesso: usa GET'
 components:
+  responses:
+    ChiaveNonValida:
+      description: Missing or invalid key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errore'
+          example:
+            ok: false
+            errore: chiave non valida
   schemas:
-    Errore:
-      type: object
-      required:
-      - ok
-      - errore
-      properties:
-        ok:
-          type: boolean
-          const: false
-        errore:
-          type: string
-          description: Human-readable explanation, always in Italian.
     Stato:
       type: object
       required:
@@ -140,16 +138,18 @@ components:
         soppressi:
           type: integer
           description: Entries on the suppression list.
-  responses:
-    ChiaveNonValida:
-      description: Missing or invalid key.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Errore'
-          example:
-            ok: false
-            errore: chiave non valida
+    Errore:
+      type: object
+      required:
+      - ok
+      - errore
+      properties:
+        ok:
+          type: boolean
+          const: false
+        errore:
+          type: string
+          description: Human-readable explanation, always in Italian.
   securitySchemes:
     chiaveBearer:
       type: http
