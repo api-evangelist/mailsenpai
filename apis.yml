@@ -14,6 +14,12 @@ specificationVersion: '0.20'
 created: '2026-10-12'
 modified: '2026-10-12'
 tags:
+- Email Marketing
+- B2B outreach
+- SMTP relay
+- Artificial Intelligence
+- Newsletter platform
+tags_raw:
 - Email marketing
 - B2B outreach
 - SMTP relay
@@ -205,6 +211,8 @@ apis:
   humanURL: https://en.mailsenpai.com/smtp-api/
   baseURL: https://app.mailsenpai.com/relay/v1
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
