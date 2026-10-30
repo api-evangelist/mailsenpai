@@ -64,5 +64,142 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-SMTP Senpai (MailSenpai) is a company surfaced via the API Evangelist harvest backlog (source: new-submission) and added to the network as a stub for full-pipeline profiling.
-- https://en.mailsenpai.com/
+MailSenpai is an Italian email service for businesses, operating since 2016 with servers and data hosted in the European Union. It offers two products: an email marketing platform for newsletters and campaigns, and SMTP Senpai, a transactional email relay service with REST API and SMTP access. The service supports Italian and English support, provides DKIM signing, SPF/DKIM/DMARC checks, and detailed sending logs. Plans are tiered with a free trial and pricing in euros, targeting B2B outreach and marketing automation.
+
+**Areas:** Email Marketing · B2B outreach · SMTP relay · Artificial Intelligence · Newsletter platform
+
+## SMTP Senpai (MailSenpai) on APIs.io
+
+Everything profiled for SMTP Senpai (MailSenpai) is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/mailsenpai/](https://apis.io/providers/mailsenpai/)** — or go straight to one of the APIs or properties below.
+
+### APIs (7)
+
+- [SMTP Senpai (MailSenpai) Account API](https://apis.io/apis/mailsenpai/mailsenpai-account-api/) — The Account API from SMTP Senpai (MailSenpai) — 1 operation(s) for account.
+- [SMTP Senpai (MailSenpai) Log API](https://apis.io/apis/mailsenpai/mailsenpai-log-api/) — The Log API from SMTP Senpai (MailSenpai) — 2 operation(s) for log.
+- [SMTP Senpai (MailSenpai) Sending API](https://apis.io/apis/mailsenpai/mailsenpai-sending-api/) — The Sending API from SMTP Senpai (MailSenpai) — 1 operation(s) for sending.
+- [SMTP Senpai (MailSenpai) SMTP Senpai API](https://apis.io/apis/mailsenpai/mailsenpai-smtp-senpai-api-api/) — The SMTP Senpai API API from SMTP Senpai (MailSenpai) — 0 operation(s) for smtp senpai api.
+- [SMTP Senpai (MailSenpai) Suppression API](https://apis.io/apis/mailsenpai/mailsenpai-suppression-api/) — The Suppression API from SMTP Senpai (MailSenpai) — 3 operation(s) for suppression.
+- [SMTP Senpai (MailSenpai) Webhooks API](https://apis.io/apis/mailsenpai/mailsenpai-webhooks-api/) — The Webhooks API from SMTP Senpai (MailSenpai) — 2 operation(s) for webhooks.
+- [SMTP Senpai (MailSenpai) Website forms API](https://apis.io/apis/mailsenpai/mailsenpai-website-forms-api/) — The Website forms API from SMTP Senpai (MailSenpai) — 1 operation(s) for website forms.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Mailsenpai Webhooks](https://apis.io/asyncapis/mailsenpai/mailsenpai-webhooks/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Mailsenpai Agentic Access](https://apis.io/agentic-access/mailsenpai/mailsenpai-agentic-access/)
+
+#### JSON Schema (6)
+
+The data models the API reads and writes.
+
+- [Conteggi](https://apis.io/schemas/mailsenpai/mailsenpai-conteggi/)
+- [Evento](https://apis.io/schemas/mailsenpai/mailsenpai-evento/)
+- [InvioMulti](https://apis.io/schemas/mailsenpai/mailsenpai-invio-multi/)
+- [InvioRichiesta](https://apis.io/schemas/mailsenpai/mailsenpai-invio-richiesta/)
+- [ModuloCampi](https://apis.io/schemas/mailsenpai/mailsenpai-modulo-campi/)
+- [Stato](https://apis.io/schemas/mailsenpai/mailsenpai-stato/)
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Mailsenpai Context](https://apis.io/jsonld/mailsenpai/mailsenpai-context/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [SMTP Senpai (MailSenpai) API Rules](https://apis.io/rules/mailsenpai/mailsenpai-rules/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Mailsenpai Authentication](https://apis.io/security/mailsenpai/mailsenpai-authentication/)
+- [Mailsenpai Domain Security](https://apis.io/security/mailsenpai/mailsenpai-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Mailsenpai Plans Pricing](https://apis.io/plans/mailsenpai/mailsenpai-plans-pricing/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://en.mailsenpai.com/)
+- [Documentation](https://en.mailsenpai.com/smtp-api/)
+- [Getting started](https://en.mailsenpai.com/smtp-senpai/)
+- [API reference](https://en.mailsenpai.com/smtp-api/)
+- [Pricing](https://en.mailsenpai.com/plans/)
+- [Sign up](https://app.mailsenpai.com/customer/guest/register?lang=en)
+- [Support](https://en.mailsenpai.com/contact-us/)
+- [Blog](https://en.mailsenpai.com/blog/)
+- [Terms of service](https://en.mailsenpai.com/tc/)
+- [Privacy policy](https://en.mailsenpai.com/privacy-policy/)
+
+## API Evangelist rating
+
+**Kin Score 59.0** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 72.2 |
+| Contract governance | 35.6 |
+| Operational transparency | 18.4 |
+| Developer ergonomics | 56.5 |
+| Access clarity | 76.3 |
+
+**Agent readiness 52.6** — agent-native
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | verified |
+| Error Semantics | verified |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | — |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 22.7** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/mailsenpai/](https://apis.io/providers/mailsenpai/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for SMTP Senpai (MailSenpai): the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/mailsenpai/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
